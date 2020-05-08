@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
