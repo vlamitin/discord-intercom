@@ -1,0 +1,2 @@
+- https://github.com/intercom/intercom-node/issues/264 - intercom node sdk is outdated and poorly mainained
+- instead we use 2.0 version of api using axios https://developers.intercom.com/intercom-api-reference/v2.0/reference
