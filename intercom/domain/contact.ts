@@ -42,6 +42,14 @@ export interface DiscordContactFull extends Omit<ContactFull, 'custom_attributes
 
 export type Contact = DiscordContactFull
 
+export interface ContactSearchResponse {
+    type: 'list'
+    data: Contact[]
+    total_count: number
+
+    [key: string]: any
+}
+
 export function validateContact(contact: NewDiscordContact): string {
     const generateResultString = (reason: string) => `Invalid contact: ${reason}, see rules of validation here https://developers.intercom.com/intercom-api-reference/reference#create-contact`
     if (contact.role === 'user') {

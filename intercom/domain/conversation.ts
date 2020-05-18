@@ -19,9 +19,17 @@ export interface Conversation {
     type: 'conversation'
     id: string
     contacts?: Contact[]
+    created_at: number
+    updated_at: number
 
     conversation_parts?: ConversationPartsObject
     [key: string]: any
+}
+
+export interface GetConversationsResponse {
+    type: 'conversation.list'
+    total_count: number
+    conversations: Conversation[]
 }
 
 export type ReplyMessageConversationId = 'last' | string

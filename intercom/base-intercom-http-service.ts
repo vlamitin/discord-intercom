@@ -19,6 +19,6 @@ export class BaseIntercomHttpService extends BaseHttpService {
                 'Content-Type': 'application/json',
                 ...config.headers
             },
-        }, options);
+        }, options)
     }
 }

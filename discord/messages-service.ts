@@ -10,7 +10,7 @@ export class MessagesService {
 
     broadcast = async (message: string) => {
         const promises = []
-        console.debug(new Date().toISOString(), 'info', 'Users found: ', this.discordClient.users.cache.size);
+        console.debug(new Date().toISOString(), 'info', 'Users found: ', this.discordClient.users.cache.size)
         this.discordClient.users.cache.forEach(((user: User, key) => {
             if (user.bot) {
                 return

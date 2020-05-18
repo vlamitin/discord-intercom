@@ -1,22 +1,16 @@
 import * as express from 'express'
-import { Client } from 'discord.js'
-import { MessagesService } from './discord/messages-service'
-import { WebhooksService } from './intercom/webhooks-service'
-import { UsersService } from './discord/users-service'
-import { ContactsService } from './intercom/contacts-service'
-import { Config } from './config'
-import { UsersCopyingService } from './users-copying-service'
+import { Services } from './index'
 
 export function setRoutes(
     controllerServer: express.Express,
-    discordClient: Client,
-    config: Config
+    services: Services
 ) {
-    const discordMessagesService = new MessagesService(discordClient)
-    const discordUsersService = new UsersService(discordClient)
-    const intercomContactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
-    const intercomWebhooksService = new WebhooksService()
-    const usersCopyingService = new UsersCopyingService(discordUsersService, intercomContactsService)
+    const {
+        discordMessagesService,
+        discordUsersService,
+        intercomWebhooksService,
+        usersCopyingService,
+    } = services
 
     controllerServer.get('/api/ping',  (req: express.Request, res: express.Response, next: express.NextFunction) => {
         res.status(200).send(JSON.stringify({
