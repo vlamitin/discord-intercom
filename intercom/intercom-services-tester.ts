@@ -46,8 +46,8 @@ async function test() {
     // console.log(contact)
 
     // const conversations = await conversationsService.getAllConversations()
-    // console.log(JSON.stringify(conversations))
-
+    // // console.log(JSON.stringify(conversations))
+    //
     // const conversations = await conversationsService.getConversationsByContactId(
     //     // '5ebef439beaeeec862d97d26' // hoban
     //     // '5ebff37f6b2686d52c2c2124', // vlamitin

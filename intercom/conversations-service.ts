@@ -23,7 +23,7 @@ export class ConversationsService extends BaseIntercomHttpService {
             message_type: 'comment',
             type: 'user',
             body: content,
-            user_id: contactId
+            intercom_user_id: contactId
         }
 
         const validationResult = validateContactConversationReplyMessage(replyMessage)
