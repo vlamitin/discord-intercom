@@ -1,6 +1,7 @@
 import { Contact } from './contact'
 
 export interface Author {
+    /** intercom id */
     id: string
     type: 'user' | 'admin' | 'bot'
 }

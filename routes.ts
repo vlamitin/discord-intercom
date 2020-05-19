@@ -26,13 +26,13 @@ export function setRoutes(
 
     /* req.body should be { message: string } */
     controllerServer.post('/api/discord/messages/broadcast',  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        await discordMessagesService.broadcast(req.body.message)
+        await discordMessagesService.broadcastMessage(req.body.message)
 
         res.status(200).send(JSON.stringify({ success: true }))
     })
 
-    controllerServer.post('/api/intercom/hooks', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        await intercomWebhooksService.handleHook(req.body)
+    controllerServer.post('/api/intercom/hooks', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        intercomWebhooksService.handleHook(req.body)
 
         res.status(200).send(JSON.stringify({
             handled: true

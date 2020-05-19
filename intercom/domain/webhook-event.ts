@@ -13,6 +13,7 @@ export interface WebhookConversationAuthor extends Author {
 
 interface UserAuthor extends WebhookConversationAuthor {
     type: 'user'
+    /** external id */
     user_id?: string
 }
 

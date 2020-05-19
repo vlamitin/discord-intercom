@@ -31,12 +31,12 @@ function initServices(discordClient: Client): Services {
     const discordUsersService = new UsersService(discordClient)
     const intercomContactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
     const intercomConversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
-    const intercomWebhooksService = new WebhooksHandlerService()
     const usersCopyingService = new UsersCopyingService(discordUsersService, intercomContactsService)
     const discordIntercomConversationService = new DiscordIntercomConversationService(
         intercomContactsService,
         intercomConversationsService
     )
+    const intercomWebhooksService = new WebhooksHandlerService(discordMessagesService)
     const messagesHandlerService = new MessagesHandlerService(discordIntercomConversationService)
 
     return {
