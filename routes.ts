@@ -31,6 +31,13 @@ export function setRoutes(
         res.status(200).send(JSON.stringify({ success: true }))
     })
 
+    /* intercom sometimes pings with head request */
+    controllerServer.head('/api/intercom/hooks', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        res.status(200).send(JSON.stringify({
+            handled: true
+        }))
+    })
+
     controllerServer.post('/api/intercom/hooks', (req: express.Request, res: express.Response, next: express.NextFunction) => {
         intercomWebhooksService.handleHook(req.body)
 

@@ -2,14 +2,21 @@ import { ContactsService } from './intercom/contacts-service'
 import { Contact } from './intercom/domain/contact'
 import { ConversationsService } from './intercom/conversations-service'
 import { Conversation } from './intercom/domain/conversation'
+import { MessagesService } from './discord/messages-service'
 
 export class DiscordIntercomConversationService {
     contactsService: ContactsService
     conversationsService: ConversationsService
+    discordMessagesService: MessagesService
 
-    constructor(contactsService: ContactsService, conversationsService: ConversationsService) {
+    constructor(
+        contactsService: ContactsService,
+        conversationsService: ConversationsService,
+        discordMessagesService: MessagesService
+    ) {
         this.contactsService = contactsService
         this.conversationsService = conversationsService
+        this.discordMessagesService = discordMessagesService
     }
 
     sendMessageFromDiscordToIntercomAdmin = async (
@@ -49,5 +56,17 @@ export class DiscordIntercomConversationService {
             content
         )
         return
+    }
+
+    sendMessageFromIntercomToDiscordContact = async (
+        discordUserId: string,
+        content: string,
+        intercomConversationId: string
+    ): Promise<void> => {
+        await this.discordMessagesService.sendMessage(
+            discordUserId,
+            content
+        )
+        await this.conversationsService.markConversationReaded(intercomConversationId)
     }
 }

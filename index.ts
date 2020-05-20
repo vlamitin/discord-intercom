@@ -34,9 +34,10 @@ function initServices(discordClient: Client): Services {
     const usersCopyingService = new UsersCopyingService(discordUsersService, intercomContactsService)
     const discordIntercomConversationService = new DiscordIntercomConversationService(
         intercomContactsService,
-        intercomConversationsService
+        intercomConversationsService,
+        discordMessagesService
     )
-    const intercomWebhooksService = new WebhooksHandlerService(discordMessagesService)
+    const intercomWebhooksService = new WebhooksHandlerService(discordIntercomConversationService)
     const messagesHandlerService = new MessagesHandlerService(discordIntercomConversationService)
 
     return {

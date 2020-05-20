@@ -1,4 +1,4 @@
-import { GET, POST } from '../base-http-service'
+import { GET, POST, PUT } from '../base-http-service'
 import { BaseIntercomHttpService } from './base-intercom-http-service'
 import {
     ContactConversationReplyMessage,
@@ -110,6 +110,27 @@ export class ConversationsService extends BaseIntercomHttpService {
                 admin_id: adminId,
                 assignee_id: adminId,
             }
+        })
+    }
+
+    markConversationReaded = (conversationId: string): Promise<Conversation> => {
+        return super.send<Conversation>({
+            method: PUT,
+            url: `/conversations/${conversationId}`,
+            data: {
+                read: true
+            }
+        }, {
+            responseMiddlewares: [
+                (response, next) => {
+                    if (response?.data?.id === conversationId && response?.data?.read === true) {
+                        console.debug(new Date().toISOString(), 'info', 'marked as read conversation ', conversationId)
+                    } else {
+                        console.debug(new Date().toISOString(), 'warn', 'failed to mark conversation as read ', conversationId)
+                    }
+                    next()
+                }
+            ]
         })
     }
 }

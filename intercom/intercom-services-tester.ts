@@ -22,12 +22,12 @@ async function test() {
     // })
     // console.log(created)
     //
-    const replied = await conversationsService.replyToConversation(
-        '27122530513',
-        '5ec0f1076fdffab37a4a37fa',
-        'bla',
-    )
-    console.log(replied)
+    // const replied = await conversationsService.replyToConversation(
+    //     '27122530513',
+    //     '5ec0f1076fdffab37a4a37fa',
+    //     'bla',
+    // )
+    // console.log(replied)
 
     // const assigned = await conversationsService.autoAssignConversationToAdmin(
     //     '27122530513',
@@ -48,12 +48,14 @@ async function test() {
     // const conversations = await conversationsService.getAllConversations()
     // // console.log(JSON.stringify(conversations))
     //
-    // const conversations = await conversationsService.getConversationsByContactId(
-    //     // '5ebef439beaeeec862d97d26' // hoban
-    //     // '5ebff37f6b2686d52c2c2124', // vlamitin
-    //     '5ec0f1076fdffab37a4a37fa' // jeremyvlz
-    // )
-    // console.log(JSON.stringify(conversations))
+    const conversations = await conversationsService.getConversationsByContactId(
+        // '5ebef439beaeeec862d97d26' // hoban
+        '5ebff37f6b2686d52c2c2124', // vlamitin
+        // '5ec0f1076fdffab37a4a37fa' // jeremyvlz
+    )
+    console.log(JSON.stringify(conversations))
+
+
 }
 
 // ts-node ./intercom/intercom-services-tester.ts
