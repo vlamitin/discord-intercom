@@ -1,22 +1,36 @@
 import { Message } from 'discord.js'
-import { DiscordIntercomConversationService } from '../discord-intercom-conversation-service'
+import { SyncConversationsService } from '../sync-conversations-service'
 
 export class MessagesHandlerService {
-    discordIntercomConversationService: DiscordIntercomConversationService
+    syncConversationsService: SyncConversationsService
 
-    constructor(discordIntercomConversationService: DiscordIntercomConversationService) {
-        this.discordIntercomConversationService = discordIntercomConversationService
+    constructor(syncConversationsService: SyncConversationsService) {
+        this.syncConversationsService = syncConversationsService
     }
 
     handleMessage = async (message: Message) => {
-        console.log(`new message from ${message.author.username} "${message.content}"`)
+        // console.log(`new message from ${message.author.username} "${message.content}"`)
+        //
+        // console.log('message.author.id', message.author.id)
+        // console.log('message.channel.id', message.channel.id)
+        // console.log('message.channel.type', message.channel.type)
+        //
+        // console.log('message.type', message.type)
+        //
+        // console.log(JSON.stringify(message))
 
-        if (!message.author.bot) {
-            await this.discordIntercomConversationService
-                .sendMessageFromDiscordToIntercomAdmin(
-                    message.author.id,
-                    message.content
-                )
+        if (message.author.bot) {
+            return
         }
+
+        if (message.channel.type !== 'dm') {
+            return
+        }
+
+        await this.syncConversationsService
+            .sendMessageFromDiscordToIntercomAdmin(
+                message.author.id,
+                message.content
+            )
     }
 }

@@ -79,6 +79,13 @@ export class ConversationsService extends BaseIntercomHttpService {
             })
     }
 
+    getConversationById = (conversationId: string): Promise<Conversation> => {
+        return super.send<Conversation>({
+            method: POST,
+            url: `/conversations/${conversationId}`,
+        })
+    }
+
     createConversationInitiatedByContact = (contactId: string, content: string): Promise<void> => {
         return super.send<void>({
             method: POST,
@@ -113,7 +120,7 @@ export class ConversationsService extends BaseIntercomHttpService {
         })
     }
 
-    markConversationReaded = (conversationId: string): Promise<Conversation> => {
+    markConversationAsRead = (conversationId: string): Promise<Conversation> => {
         return super.send<Conversation>({
             method: PUT,
             url: `/conversations/${conversationId}`,

@@ -1,7 +1,6 @@
 import { UsersService } from './discord/users-service'
 import { ContactsService } from './intercom/contacts-service'
 import { User } from 'discord.js'
-import { NewDiscordContact, validateContact } from './intercom/domain/contact'
 import { getAxiosErrorSummary } from './base-http-service'
 
 export interface DiscordToIntercomResult {
@@ -11,7 +10,7 @@ export interface DiscordToIntercomResult {
     alreadyExistInIntercom: number
 }
 
-export class UsersCopyingService {
+export class SyncUsersService {
     discordUsersService: UsersService
     intercomContactsService: ContactsService
 
@@ -20,7 +19,7 @@ export class UsersCopyingService {
         this.intercomContactsService = intercomContactsService
     }
 
-    discordToIntercom = async (): Promise<DiscordToIntercomResult> => {
+    addDiscordUsersAsIntercomContacts = async (): Promise<DiscordToIntercomResult> => {
         const users = this.discordUsersService.getAllUsers() || []
 
         let discordUsersCount = users.length
@@ -39,21 +38,11 @@ export class UsersCopyingService {
             promises.push(async () => {
                 console.debug(new Date().toISOString(), 'info', 'copying to intercom user ', user.username + ' ...')
                 try {
-                    const newContact: NewDiscordContact = {
-                        role: 'user',
-                        external_id: user.id,
-                        name: user.username,
-                        avatar: user.avatar || ''
-                    }
-
-                    const validationResult = validateContact(newContact)
-
-                    if (validationResult) {
-                        console.error(new Date().toISOString(), 'error', 'error while copying to intercom user - invalid', user.username, validationResult)
-                        return
-                    }
-
-                    await this.intercomContactsService.copyContactFromDiscord(newContact)
+                    await this.intercomContactsService.copyContactFromDiscord(
+                        user.id,
+                        user.username,
+                        user.avatar
+                    )
                     copiedToIntercom++
                 } catch (e) {
                     console.error(new Date().toISOString(), 'error', 'error while copying to intercom user ', user.username, getAxiosErrorSummary(e))

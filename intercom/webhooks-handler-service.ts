@@ -1,11 +1,11 @@
 import { WebhookEvent, WebhookTopic } from './domain/webhook-event'
-import { DiscordIntercomConversationService } from '../discord-intercom-conversation-service'
+import { SyncConversationsService } from '../sync-conversations-service'
 
 export class WebhooksHandlerService {
-    discordIntercomConversationService: DiscordIntercomConversationService
+    syncConversationsService: SyncConversationsService
 
-    constructor(discordIntercomConversationService: DiscordIntercomConversationService) {
-        this.discordIntercomConversationService = discordIntercomConversationService
+    constructor(syncConversationsService: SyncConversationsService) {
+        this.syncConversationsService = syncConversationsService
     }
 
     handleHook = async (intercomEvent: WebhookEvent): Promise<void> => {
@@ -21,7 +21,7 @@ export class WebhooksHandlerService {
                 const message: string = stripHtmlText(intercomEvent.data.item.conversation_message.body)
                 const conversationId: string = intercomEvent.data.item.id
 
-                return this.discordIntercomConversationService.sendMessageFromIntercomToDiscordContact(
+                return this.syncConversationsService.sendMessageFromIntercomToDiscordContact(
                     externalId,
                     message,
                     conversationId
@@ -35,7 +35,7 @@ export class WebhooksHandlerService {
                     ?.body || '')
                 const conversationId: string = intercomEvent.data.item.id
 
-                return this.discordIntercomConversationService.sendMessageFromIntercomToDiscordContact(
+                return this.syncConversationsService.sendMessageFromIntercomToDiscordContact(
                     externalId,
                     message,
                     conversationId

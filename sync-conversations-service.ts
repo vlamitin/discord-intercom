@@ -4,7 +4,7 @@ import { ConversationsService } from './intercom/conversations-service'
 import { Conversation } from './intercom/domain/conversation'
 import { MessagesService } from './discord/messages-service'
 
-export class DiscordIntercomConversationService {
+export class SyncConversationsService {
     contactsService: ContactsService
     conversationsService: ConversationsService
     discordMessagesService: MessagesService
@@ -67,6 +67,6 @@ export class DiscordIntercomConversationService {
             discordUserId,
             content
         )
-        await this.conversationsService.markConversationReaded(intercomConversationId)
+        await this.conversationsService.markConversationAsRead(intercomConversationId)
     }
 }

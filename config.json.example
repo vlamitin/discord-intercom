@@ -1,0 +1,6 @@
+{
+  "port": 3002,
+  "discordBotToken": "M2NfNDQxM=",
+  "intercomApiUrl": "https://api.intercom.io",
+  "intercomAppToken": "Y3ZTI5Zjo="
+}

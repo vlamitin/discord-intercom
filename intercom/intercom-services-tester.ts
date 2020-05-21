@@ -1,17 +1,19 @@
 import { ContactsService } from './contacts-service'
-import { getExampleContactForCreation } from './domain/contact'
 import { ConversationsService } from './conversations-service'
-import { getExampleContactConversationReplyMessage } from './domain/conversation'
 import { BaseHttpService, getAxiosErrorSummary } from '../base-http-service'
+import { UsersService } from '../discord/users-service'
+import { startDiscordBot } from '../discord/bot-starter'
+
 const config = require('../config.json')
 
-export const contactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
-export const conversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
+BaseHttpService.generalErrorMiddlewares.push(((error, next) => {
+    console.error(new Date().toISOString(), 'error', `BaseHttpService, Axios error:\n`, getAxiosErrorSummary(error))
+}))
 
-async function test() {
-    BaseHttpService.generalErrorMiddlewares.push(((error, next) => {
-        console.error(new Date().toISOString(), 'error', `BaseHttpService, Axios error:\n`, getAxiosErrorSummary(error))
-    }))
+async function testIntercom() {
+    const contactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
+    const conversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
+
     // const contacts = await contactsService.getAllContacts()
     // console.log(JSON.stringify(contacts))
     //
@@ -41,22 +43,38 @@ async function test() {
     // console.log(assigned)
     //
     // const contact = await contactsService.getContactByExternalId(
-    //     '708392433414570144',
+    //     '712972775236698210',
     // )
     // console.log(contact)
 
     // const conversations = await conversationsService.getAllConversations()
     // // console.log(JSON.stringify(conversations))
     //
-    const conversations = await conversationsService.getConversationsByContactId(
-        // '5ebef439beaeeec862d97d26' // hoban
-        '5ebff37f6b2686d52c2c2124', // vlamitin
-        // '5ec0f1076fdffab37a4a37fa' // jeremyvlz
-    )
-    console.log(JSON.stringify(conversations))
+    // const conversations = await conversationsService.getConversationsByContactId(
+    //     // '5ebef439beaeeec862d97d26' // hoban
+    //     '5ebff37f6b2686d52c2c2124', // vlamitin
+    //     // '5ec0f1076fdffab37a4a37fa' // jeremyvlz
+    // )
+    // console.log(JSON.stringify(conversations))
 
-
+    // const conversationFull = await conversationsService.getConversationById(
+    //     '27122349981'
+    // )
+    // console.log(JSON.stringify(conversationFull))
 }
 
+async function testDiscord() {
+    const discordClient = await startDiscordBot(config.discordBotToken)
+    const usersService = new UsersService(discordClient)
+
+    const users = await usersService.getAllUsers()
+    console.log(JSON.stringify(users))
+
+    process.exit(0)
+}
+
+
+
 // ts-node ./intercom/intercom-services-tester.ts
-test()
+// testIntercom()
+testDiscord()

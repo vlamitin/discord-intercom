@@ -1,5 +1,5 @@
 import { GET, NextMiddleware, POST, RequestError } from '../base-http-service'
-import { Contact, ContactSearchResponse, NewContact, NewDiscordContact } from './domain/contact'
+import { Contact, ContactSearchResponse, NewContact, NewDiscordContact, validateContact } from './domain/contact'
 import { BaseIntercomHttpService } from './base-intercom-http-service'
 import { AxiosError } from 'axios'
 
@@ -38,11 +38,25 @@ export class ContactsService extends BaseIntercomHttpService {
             })
     }
 
-    copyContactFromDiscord = (contact: NewDiscordContact): Promise<Contact | AxiosError> => {
+    copyContactFromDiscord = (discordUserId: string, name: string, avatar: string): Promise<void | Contact | AxiosError> => {
+        const newContact: NewDiscordContact = {
+            role: 'user',
+            external_id: discordUserId,
+            name,
+            avatar: avatar || ''
+        }
+
+        const validationResult = validateContact(newContact)
+
+        if (validationResult) {
+            console.error(new Date().toISOString(), 'error', 'error while copying to intercom user - invalid', name, validationResult)
+            return
+        }
+
         return super.send<Contact>({
             method: POST,
             url: '/contacts',
-            data: contact
+            data: newContact
         }, {
             errorMiddlewares: [(error: RequestError, next: NextMiddleware): void => {
                 throw error

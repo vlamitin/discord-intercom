@@ -9,21 +9,26 @@ import { MessagesService } from './discord/messages-service'
 import { UsersService } from './discord/users-service'
 import { ContactsService } from './intercom/contacts-service'
 import { WebhooksHandlerService } from './intercom/webhooks-handler-service'
-import { UsersCopyingService } from './users-copying-service'
-import { DiscordIntercomConversationService } from './discord-intercom-conversation-service'
+import { SyncUsersService } from './sync-users-service'
+import { SyncConversationsService } from './sync-conversations-service'
 import { ConversationsService } from './intercom/conversations-service'
+import { GuildMembersChangeHandlerService } from './discord/guild-members-change-handler-service'
+import { Config } from './config'
+import { SerializedState } from './serialized-state'
 
-const config = require('./config.json')
+const config: Config = require('./config.json')
+const serializedState: SerializedState = require('./serialized-state.json')
 
 export interface Services {
     discordMessagesService: MessagesService
     discordUsersService: UsersService
+    discordMessagesHandlerService: MessagesHandlerService
+    discordGuildMembersChangeHandlerService: GuildMembersChangeHandlerService
     intercomContactsService: ContactsService
     intercomConversationsService: ConversationsService
     intercomWebhooksService: WebhooksHandlerService
-    usersCopyingService: UsersCopyingService
-    messagesHandlerService: MessagesHandlerService
-    discordIntercomConversationService: DiscordIntercomConversationService
+    syncUsersService: SyncUsersService
+    syncConversationsService: SyncConversationsService
 }
 
 function initServices(discordClient: Client): Services {
@@ -31,14 +36,19 @@ function initServices(discordClient: Client): Services {
     const discordUsersService = new UsersService(discordClient)
     const intercomContactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
     const intercomConversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
-    const usersCopyingService = new UsersCopyingService(discordUsersService, intercomContactsService)
-    const discordIntercomConversationService = new DiscordIntercomConversationService(
+    const syncUsersService = new SyncUsersService(discordUsersService, intercomContactsService)
+    const syncConversationsService = new SyncConversationsService(
         intercomContactsService,
         intercomConversationsService,
         discordMessagesService
     )
-    const intercomWebhooksService = new WebhooksHandlerService(discordIntercomConversationService)
-    const messagesHandlerService = new MessagesHandlerService(discordIntercomConversationService)
+    const intercomWebhooksService = new WebhooksHandlerService(syncConversationsService)
+    const messagesHandlerService = new MessagesHandlerService(syncConversationsService)
+    const discordGuildMembersChangeHandlerService = new GuildMembersChangeHandlerService(
+        serializedState.welcomeMessages,
+        intercomContactsService,
+        discordMessagesService
+    )
 
     return {
         discordMessagesService,
@@ -46,9 +56,10 @@ function initServices(discordClient: Client): Services {
         intercomContactsService,
         intercomConversationsService,
         intercomWebhooksService,
-        usersCopyingService,
-        messagesHandlerService,
-        discordIntercomConversationService,
+        syncUsersService: syncUsersService,
+        discordMessagesHandlerService: messagesHandlerService,
+        syncConversationsService: syncConversationsService,
+        discordGuildMembersChangeHandlerService,
     }
 }
 
@@ -60,9 +71,11 @@ async function start(): Promise<void> {
     const discordClient = await startDiscordBot(config.discordBotToken)
 
     const services: Services = initServices(discordClient)
-    const { messagesHandlerService } = services
+    const { discordMessagesHandlerService, discordGuildMembersChangeHandlerService } = services
 
-    discordClient.on("message", messagesHandlerService.handleMessage)
+    discordClient.on('message', discordMessagesHandlerService.handleMessage)
+    discordClient.on('guildMemberAdd', discordGuildMembersChangeHandlerService.handleMemberAdd)
+    discordClient.on('guildMemberRemove', discordGuildMembersChangeHandlerService.handleMemberRemove)
 
     return startControllerServer(services)
 }

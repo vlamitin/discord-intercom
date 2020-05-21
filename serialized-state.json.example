@@ -1,0 +1,12 @@
+{
+  "welcomeMessages": [
+    {
+      "content": "Hello, I'm your admin and I will send you special offers, answer your questions",
+      "channel": "dm"
+    },
+    {
+      "content": "Welcome our new user {{username}}!",
+      "channel": "general"
+    }
+  ]
+}

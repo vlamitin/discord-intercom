@@ -9,7 +9,8 @@ export function setRoutes(
         discordMessagesService,
         discordUsersService,
         intercomWebhooksService,
-        usersCopyingService,
+        syncUsersService,
+        discordGuildMembersChangeHandlerService,
     } = services
 
     controllerServer.get('/api/ping',  (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -31,6 +32,28 @@ export function setRoutes(
         res.status(200).send(JSON.stringify({ success: true }))
     })
 
+    controllerServer.get('/api/discord/guild/welcome-messages',  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        res.status(200).send(JSON.stringify({
+            messages: discordGuildMembersChangeHandlerService.welcomeMessages
+        }))
+    })
+
+    /* req.body should be
+    {
+        "messages": [{
+            "content": "Welcome our new user {{username}}!",
+            "channel": "general"
+        }]
+    }
+    *  */
+    controllerServer.post('/api/discord/guild/welcome-messages',  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        discordGuildMembersChangeHandlerService.setWelcomeMessages(req.body.messages)
+
+        res.status(200).send(JSON.stringify({
+            messages: discordGuildMembersChangeHandlerService.welcomeMessages
+        }))
+    })
+
     /* intercom sometimes pings with head request */
     controllerServer.head('/api/intercom/hooks', (req: express.Request, res: express.Response, next: express.NextFunction) => {
         res.status(200).send(JSON.stringify({
@@ -47,7 +70,7 @@ export function setRoutes(
     })
 
     controllerServer.post('/api/integration/copy-discord-users-to-intercom', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const result = await usersCopyingService.discordToIntercom()
+        const result = await syncUsersService.addDiscordUsersAsIntercomContacts()
 
         res.status(200).send(JSON.stringify(result))
     })
