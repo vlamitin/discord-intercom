@@ -22,7 +22,8 @@ export class SyncConversationsService {
 
     sendMessageFromDiscordToIntercomAdmin = async (
         discordUserId: string,
-        content: string
+        content: string,
+        attachmentUrls: string[]
     ): Promise<void> => {
         const intercomContact: Contact = await this.contactsService.getContactByExternalId(discordUserId)
         if (!intercomContact) {
@@ -41,6 +42,16 @@ export class SyncConversationsService {
                 intercomContact.id,
                 content
             )
+                .then(() => {
+                    if (attachmentUrls.length > 0) {
+                        console.warn(new Date().toISOString(), 'warn', 'Attachments found when first message - sending second message...')
+                        return this.sendMessageFromDiscordToIntercomAdmin(
+                            discordUserId,
+                            '...',
+                            attachmentUrls
+                        )
+                    }
+                })
         }
 
         const sortedByUpdated: Conversation[] = contactConversations
@@ -54,7 +65,8 @@ export class SyncConversationsService {
         await this.conversationsService.replyToConversation(
             latestConversation.id,
             intercomContact.id,
-            content
+            content,
+            attachmentUrls
         )
         return
     }

@@ -65,6 +65,10 @@ export function validateContactConversationReplyMessage(message: ContactConversa
         return generateResultString('no email or user_id or intercom_user_id provided')
     }
 
+    if (message.attachment_urls && message.attachment_urls.length > 5) {
+        return generateResultString('you can send maximum of 5 attachment urls')
+    }
+
     return ''
 }
 

@@ -17,13 +17,17 @@ export class ConversationsService extends BaseIntercomHttpService {
     replyToConversation = (
         conversationId: ReplyMessageConversationId,
         contactId: string,
-        content: string
+        content: string,
+        attachmentUrls: string[]
     ): Promise<Conversation> => {
         const replyMessage: ContactConversationReplyMessage = {
             message_type: 'comment',
             type: 'user',
             body: content,
-            intercom_user_id: contactId
+            intercom_user_id: contactId,
+            /* https://developers.intercom.com/intercom-api-reference/reference#reply-to-a-conversation */
+            /* 5 is max attachments */
+            attachment_urls: attachmentUrls.slice(0, 5)
         }
 
         const validationResult = validateContactConversationReplyMessage(replyMessage)
@@ -40,6 +44,18 @@ export class ConversationsService extends BaseIntercomHttpService {
             url: `/conversations/${conversationId}/reply`,
             data: replyMessage
         })
+            .then(replied => {
+                if (attachmentUrls.slice(5).length > 0) {
+                    return this.replyToConversation(
+                        conversationId,
+                        contactId,
+                        '...',
+                        attachmentUrls.slice(5)
+                    )
+                } else {
+                    return replied
+                }
+            })
     }
 
     getAllConversations = (): Promise<Conversation[]> => {
@@ -86,6 +102,7 @@ export class ConversationsService extends BaseIntercomHttpService {
         })
     }
 
+    /* TODO attachments not supported */
     createConversationInitiatedByContact = (contactId: string, content: string): Promise<void> => {
         return super.send<void>({
             method: POST,

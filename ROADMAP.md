@@ -9,6 +9,7 @@
 - [x] Feature/html page with form for broadcast
 - [x] Feature/html page with copy clients
 - [x] auth for all exposed api
-- [ ] Feature/Media (photo) and documents in conversation
+- [x] (!DONE EXCEPT WHEN DISCORD USER SENDS THE VERY FIRST MESSAGE TO ADMIN) Feature/Attachments in conversation
+- [x] Feature/Attachments in conversation from discord to intercom when it is first conversation
 - [ ] Dockerize app
 - [ ] E2E tests

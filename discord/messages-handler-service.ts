@@ -9,15 +9,7 @@ export class MessagesHandlerService {
     }
 
     handleMessage = async (message: Message) => {
-        // console.log(`new message from ${message.author.username} "${message.content}"`)
-        //
-        // console.log('message.author.id', message.author.id)
-        // console.log('message.channel.id', message.channel.id)
-        // console.log('message.channel.type', message.channel.type)
-        //
-        // console.log('message.type', message.type)
-        //
-        // console.log(JSON.stringify(message))
+        const attachments: string[] = message.attachments?.map(attachment => attachment.url) || []
 
         if (message.author.bot) {
             return
@@ -30,7 +22,8 @@ export class MessagesHandlerService {
         await this.syncConversationsService
             .sendMessageFromDiscordToIntercomAdmin(
                 message.author.id,
-                message.content
+                message.content,
+                attachments
             )
     }
 }
