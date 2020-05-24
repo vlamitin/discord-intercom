@@ -6,10 +6,22 @@ export interface Author {
     type: 'user' | 'admin' | 'bot'
 }
 
+
+export interface ConversationMessageAttachment {
+    type: 'upload'
+    name: string
+    url: string
+
+    [key: string]: any
+}
+
+
 export interface ConversationPart {
     type: 'comment' | 'assignment' | 'open' | 'close' | 'participant_added' | string
     body: string
     author: Author
+    attachments?: ConversationMessageAttachment[]
+    [key: string]: any
 }
 
 export interface ConversationPartsObject {

@@ -3,6 +3,7 @@ import { Contact } from './intercom/domain/contact'
 import { ConversationsService } from './intercom/conversations-service'
 import { Conversation } from './intercom/domain/conversation'
 import { MessagesService } from './discord/messages-service'
+import { Attachment } from './discord/domain/attachment'
 
 export class SyncConversationsService {
     contactsService: ContactsService
@@ -60,12 +61,14 @@ export class SyncConversationsService {
 
     sendMessageFromIntercomToDiscordContact = async (
         discordUserId: string,
-        content: string,
-        intercomConversationId: string
+        intercomConversationId: string,
+        textRows: string[],
+        attachments: Attachment[]
     ): Promise<void> => {
         await this.discordMessagesService.sendMessage(
             discordUserId,
-            content
+            textRows,
+            attachments
         )
         await this.conversationsService.markConversationAsRead(intercomConversationId)
     }

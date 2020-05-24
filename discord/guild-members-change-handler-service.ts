@@ -26,7 +26,7 @@ export class GuildMembersChangeHandlerService {
         this.welcomeMessages.forEach(msg => {
             const messageContent = fillMessageWithUserProps(msg.content, member.user)
             if (msg.channel === 'dm') {
-                this.discordMessagesService.sendMessageToUser(member.user, messageContent)
+                this.discordMessagesService.sendMessageToUser(member.user, [messageContent], [])
             } else {
                 const channel = member.guild.channels.cache.find(ch => ch.name === msg.channel)
                 if (!channel) {

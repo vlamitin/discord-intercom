@@ -1,4 +1,5 @@
-import { Client, Message, User } from 'discord.js'
+import { Client, Message, MessageAttachment, User } from 'discord.js'
+import { Attachment } from './domain/attachment'
 
 export class MessagesService {
     discordClient: Client
@@ -15,31 +16,42 @@ export class MessagesService {
                 return
             }
 
-            promises.push(async () => this.sendMessageToUser(user, message))
+            promises.push(async () => this.sendMessageToUser(user, [message], []))
         }))
 
         return Promise.all(promises.map(pr => pr()))
     }
 
-    sendMessage = (discordUserId: string, message: string): Promise<Message | void> => {
+    sendMessage = (
+        discordUserId: string,
+        textRows: string[],
+        attachments: Attachment[]
+    ): Promise<Message | void> => {
         const discordUser: User = this.discordClient.users.cache.find(user => user.id === discordUserId)
         if (!discordUser) {
             console.debug(new Date().toISOString(), 'warn', 'no user found with id: ', discordUserId)
             return
         }
 
-        return this.sendMessageToUser(discordUser, message)
+        return this.sendMessageToUser(discordUser, textRows, attachments)
     }
 
-    sendMessageToUser = async (user: User, message: string): Promise<Message | void> => {
-        if (!message) {
+    sendMessageToUser = async (
+        user: User,
+        textRows: string[],
+        attachments: Attachment[]
+    ): Promise<Message | void> => {
+        if (textRows.length === 0) {
             console.debug(new Date().toISOString(), 'error', 'cannot send empty message!')
             return
         }
 
         console.debug(new Date().toISOString(), 'info', 'sending message to ', user.username + ' ...')
         try {
-            return user.send(message)
+            return user.send(textRows, attachments.map(attachment => new MessageAttachment(
+                attachment.url,
+                attachment.name,
+            )))
         } catch (e) {
             console.error(new Date().toISOString(), 'error', 'error while sending message to ', user.username, e)
         }

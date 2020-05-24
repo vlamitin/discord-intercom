@@ -4,6 +4,8 @@ import { BaseHttpService, getAxiosErrorSummary } from './base-http-service'
 import { UsersService } from './discord/users-service'
 import { startDiscordBot } from './discord/bot-starter'
 import { AppUsersService } from './app-users-service'
+import { parseMessageBody } from './intercom/webhooks-handler-service-utlls'
+import { MessagesService } from './discord/messages-service'
 
 const config = require('./config.json')
 
@@ -67,9 +69,39 @@ async function testIntercom() {
 async function testDiscord() {
     const discordClient = await startDiscordBot(config.discordBotToken)
     const usersService = new UsersService(discordClient)
+    const messagesService = new MessagesService(discordClient)
 
-    const users = await usersService.getAllUsers()
-    console.log(JSON.stringify(users))
+    // const users = await usersService.getAllUsers()
+    // console.log(JSON.stringify(users))
+
+    // const message1 = await messagesService.sendMessage(
+    //     '707987110119997490', // vlamitin
+    //     [
+    //         'Привет',
+    //         'Как дела'
+    //     ],
+    //     [
+    //         {
+    //             name: 'EARL.png',
+    //             url: 'https://downloads.intercomcdn.com/i/o/211779336/e0a7b4fe06372070f426e47c/EARL.png'
+    //         },
+    //         {
+    //             name: 'file.txt',
+    //             url: 'https://hands-production.intercom-attachments-1.com/i/o/211779305/86461f16b60d8b54b5663acc/FILE.txt'
+    //         }
+    //     ]
+    // )
+    // console.log(JSON.stringify(message1))
+    //
+    // const message2 = await messagesService.sendMessage(
+    //     '707987110119997490', // vlamitin
+    //     [
+    //         'Привет',
+    //         'Как дела'
+    //     ],
+    //     []
+    // )
+    // console.log(JSON.stringify(message2))
 
     process.exit(0)
 }
@@ -93,7 +125,13 @@ function testAppUsers() {
     console.warn('inCorrectUserByToken', inCorrectUserByToken)
 }
 
+function testHtmlParse() {
+    const testMessageBody4 = '<p>sadf<br>asdf<br></p>\n<div class="intercom-container"><img src="https://downloads.intercomcdn.com/i/o/211782493/e438dfe869b779643afc641a/EARL.png"></div><p>sadf<br>sadfasdf</p>'
+    console.log('parseMessageBody', parseMessageBody(testMessageBody4))
+}
+
 // ts-node ./intercom/tester.ts
 // testIntercom()
-// testDiscord()
-testAppUsers()
+testDiscord()
+// testAppUsers()
+// testHtmlParse()

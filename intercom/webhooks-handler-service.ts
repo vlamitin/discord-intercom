@@ -1,5 +1,7 @@
 import { WebhookEvent, WebhookTopic } from './domain/webhook-event'
 import { SyncConversationsService } from '../sync-conversations-service'
+import { extractFileNameFromUrl, ParsedMessage, parseMessageBody } from './webhooks-handler-service-utlls'
+import { Attachment } from '../discord/domain/attachment'
 
 export class WebhooksHandlerService {
     syncConversationsService: SyncConversationsService
@@ -18,35 +20,50 @@ export class WebhooksHandlerService {
                 return
             case WebhookTopic.CONVERSATION_ADMIN_CREATED: {
                 const externalId: string = intercomEvent.data.item.user.user_id
-                const message: string = stripHtmlText(intercomEvent.data.item.conversation_message.body)
+                const message: ParsedMessage = parseMessageBody(intercomEvent.data.item.conversation_message.body)
                 const conversationId: string = intercomEvent.data.item.id
 
                 return this.syncConversationsService.sendMessageFromIntercomToDiscordContact(
                     externalId,
-                    message,
-                    conversationId
+                    conversationId,
+                    message.textRows,
+                    [
+                        ...message.imageUrls.map(url => ({
+                            url,
+                            name: extractFileNameFromUrl(url)
+                        }))
+                    ],
                 )
             }
             case WebhookTopic.CONVERSATION_ADMIN_REPLIED: {
                 const externalId: string = intercomEvent.data.item.user.user_id
-                const message: string = stripHtmlText(intercomEvent.data.item
+                const message: ParsedMessage = parseMessageBody(intercomEvent.data.item
                     ?.conversation_parts
                     ?.conversation_parts?.[0]
                     ?.body || '')
+                const attachments: Attachment[] = (intercomEvent.data.item
+                    ?.conversation_parts
+                    ?.conversation_parts?.[0]
+                    ?.attachments || [])
+                    .map(attachment => ({
+                        name: attachment.name,
+                        url: attachment.url
+                    }))
                 const conversationId: string = intercomEvent.data.item.id
 
                 return this.syncConversationsService.sendMessageFromIntercomToDiscordContact(
                     externalId,
-                    message,
-                    conversationId
+                    conversationId,
+                    message.textRows,
+                    [
+                        ...message.imageUrls.map(url => ({
+                            url,
+                            name: extractFileNameFromUrl(url)
+                        })),
+                        ...attachments
+                    ],
                 )
             }
         }
     }
-}
-
-/* yes, parse html with regex */
-function stripHtmlText(htmlString: string): string {
-    const TAGS_REGEX: RegExp = /<[^>]+>/g
-    return htmlString.replace(TAGS_REGEX, '')
 }
