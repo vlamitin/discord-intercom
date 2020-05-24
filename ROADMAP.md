@@ -11,5 +11,5 @@
 - [x] auth for all exposed api
 - [x] (!DONE EXCEPT WHEN DISCORD USER SENDS THE VERY FIRST MESSAGE TO ADMIN) Feature/Attachments in conversation
 - [x] Feature/Attachments in conversation from discord to intercom when it is first conversation
-- [ ] Dockerize app
+- [x] Dockerize app
 - [ ] E2E tests
