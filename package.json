@@ -4,21 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts"
+    "start": "ts-node index.ts",
+    "docker:build": "docker build -t discord-intercom:latest .",
+    "docker:run": "docker run -d -p 3002:3002 -v $PWD/config.json:/app/config.json -v $PWD/serialized-state.json:/app/serialized-state.json discord-intercom:latest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
     "discord.js": "^12.2.0",
+    "express": "^4.17.1",
     "jsdom": "^16.2.2",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.8.3",
     "qs": "^6.9.4"
   },
   "devDependencies": {
     "@types/express": "^4.17.6",
-    "@types/node": "^10.16.3",
-    "express": "^4.17.1",
-    "ts-node": "^8.10.1",
-    "typescript": "^3.8.3"
+    "@types/node": "^10.16.3"
   }
 }

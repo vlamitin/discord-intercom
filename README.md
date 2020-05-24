@@ -28,6 +28,12 @@ Integration between discord and intercom
 ## Local run
 - `npm run start`
 
+## Docker run
+- `npm run docker:build`
+- copy config.json and serialized-state.json to some folder, e.g /tmp/app
+- `cd /tmp/app`
+- `docker run -d -p 3002:3002 -v $PWD/config.json:/app/config.json -v $PWD/serialized-state.json:/app/serialized-state.json discord-intercom:latest` 
+
 ## Development tips
 - while getting new discord token is free, creating new intercom account needs you to fill credit card details to gain trial  
 - use ngrok to get https endpoint
