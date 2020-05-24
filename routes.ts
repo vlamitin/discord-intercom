@@ -82,9 +82,17 @@ export function setRoutes(
         res.status(200).send(JSON.stringify(users))
     })
 
-    /* req.body should be { message: string } */
+    /* req.body should be
+    {
+        "message": "bla",
+        "attachments": [{
+            "name": "file.txt",
+            "url": "https://cdn.com/file.txt"
+        }]
+    }
+     */
     controllerServer.post('/api/discord/messages/broadcast', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        await discordMessagesService.broadcastMessage(req.body.message)
+        await discordMessagesService.broadcastMessage(req.body.message.split('\n'), req.body.attachments)
 
         res.status(200).send(JSON.stringify({ success: true }))
     })

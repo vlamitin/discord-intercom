@@ -16,10 +16,10 @@ class LoginModel {
 
     userInfoContentString = ''
 
-    onTokenChange = (token) => console.warn('onTokenChange!: ', token)
+    onUserChange = (login, token) => console.warn('onTokenChange!: ', login, token)
 
-    constructor(onTokenChange) {
-        this.onTokenChange = onTokenChange
+    constructor(onUserChange) {
+        this.onUserChange = onUserChange
         this.loginInput.addEventListener('input', this.handleLoginChange)
         this.passwordInput.addEventListener('input', this.handlePasswordChange)
         this.loginForm.addEventListener('submit', this.handleLogin)
@@ -38,7 +38,7 @@ class LoginModel {
         this.setUserContent(`Hello, ${this.login}`)
 
         this.render()
-        this.onTokenChange(token)
+        this.onUserChange(this.login, token)
     }
 
     setFormVisible = (visible) => {
@@ -111,7 +111,7 @@ class LoginModel {
         this.setToken('')
     }
 
-    render() {
+    render = () => {
         this.setFormVisible(!this.token)
         this.setUserInfoBlockVisible(Boolean(this.token))
 
@@ -131,6 +131,9 @@ class BroadcastMessageModel {
 
     broadcastForm = document.querySelector('#broadcast-form')
     broadcastInput = document.querySelector('#broadcast-input')
+    broadcastAttachmentsContent = document.querySelector('#broadcast-attachments-content')
+    addAttachmentBtn = document.querySelector('#add-attachment-btn')
+    removeAttachmentsBtn = document.querySelector('#remove-attachments-btn')
     broadcastSubmitBtn = document.querySelector('#broadcast-submit-btn')
 
     broadcastResultBlock = document.querySelector('#broadcast-result')
@@ -147,6 +150,9 @@ class BroadcastMessageModel {
         this.token = token
 
         this.broadcastInput.addEventListener('input', this.handleMessageChange)
+        this.broadcastAttachmentsContent.addEventListener('input', this.render)
+        this.addAttachmentBtn.addEventListener('click', this.handleAddAttachment)
+        this.removeAttachmentsBtn.addEventListener('click', this.handleRemoveAttachments)
         this.broadcastForm.addEventListener('submit', this.handleSend)
         this.oneMoreMessageBtn.addEventListener('click', this.handleOneMoreMessageClick)
     }
@@ -158,6 +164,7 @@ class BroadcastMessageModel {
 
     valid = () => {
         if (!this.message) return false
+        if(this.getAttachmentData().some(attachment => !attachment.url || !attachment.name)) return false
         return true
     }
 
@@ -194,6 +201,41 @@ class BroadcastMessageModel {
         this.render()
     }
 
+    handleAddAttachment = () => {
+        this.broadcastAttachmentsContent.innerHTML += `
+            <div class="attachment" data-type="attachment-block">
+                <label>
+                    Имя файла
+                    <input data-type="attachment-name" />
+                </label>
+                <label>
+                    URL
+                    <input data-type="attachment-url"/>
+                </label>
+            </div>
+        `
+        this.render()
+    }
+
+    handleRemoveAttachments = () => {
+        this.broadcastAttachmentsContent.innerHTML = ''
+        this.render()
+    }
+
+    getAttachmentData = () => {
+        const result = []
+        Array.from(document.querySelector('#broadcast-attachments-content')
+            .querySelectorAll('*[data-type="attachment-block"]'))
+            .forEach(block => {
+                result.push({
+                    name: block.querySelector('*[data-type="attachment-name"]').value,
+                    url: block.querySelector('*[data-type="attachment-url"]').value,
+                })
+            })
+
+        return result
+    }
+
     handleSend = (event) => {
         event.preventDefault()
 
@@ -204,7 +246,8 @@ class BroadcastMessageModel {
                 'Authorization': this.token
             },
             body: JSON.stringify({
-                message: this.message
+                message: this.message,
+                attachments: this.getAttachmentData()
             })
         })
             .then(res => {
@@ -223,7 +266,7 @@ class BroadcastMessageModel {
         this.render()
     }
 
-    render() {
+    render = () => {
         if (!this.token) {
             this.setBroadcastBlockVisible(false)
             return
@@ -316,7 +359,7 @@ class CopyUsersModel {
             })
     }
 
-    render() {
+    render = () => {
         if (!this.token) {
             this.setCopyUsersBlockVisible(false)
             return
@@ -340,11 +383,22 @@ window.onload = function () {
     const copyUsersModel = new CopyUsersModel(false)
     copyUsersModel.render()
 
-    function handleTokenChange(token) {
+    function handleUserChange(login, token) {
         broadcastMessageModel.setToken(token)
         copyUsersModel.setToken(token)
+        localStorage.setItem('userInfo', JSON.stringify({
+            login,
+            token
+        }))
     }
 
-    const loginModel = new LoginModel(handleTokenChange)
+    const loginModel = new LoginModel(handleUserChange)
     loginModel.render()
+
+    const userInfo = localStorage.getItem('userInfo')
+    if (userInfo) {
+        const { login, token } = JSON.parse(userInfo)
+        loginModel.login = login
+        loginModel.setToken(token)
+    }
 }

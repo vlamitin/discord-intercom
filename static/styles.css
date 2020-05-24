@@ -1,6 +1,15 @@
+* {
+    box-sizing: border-box;
+}
+
+/* login form */
 .login-form-row {
-    width: 160px;
+    width: 400px;
     margin-bottom: 16px;
+}
+.login-form-row > label {
+    display: flex;
+    flex-direction: column;
 }
 
 .login-err-content {
@@ -8,11 +17,36 @@
     padding-bottom: 16px;
 }
 
-.broadcast-form-row {
-    width: 160px;
-    margin-bottom: 16px;
-}
-
+/* user info */
 .user-info {
     margin-bottom: 24px;
+}
+
+/* broadcast */
+.broadcast-form-row {
+    width: 400px;
+    margin-bottom: 16px;
+}
+.broadcast-form-row > label {
+    display: flex;
+    flex-direction: column;
+}
+
+.broadcast-attachments {
+    padding: 8px 0px 16px;
+}
+
+.attachment {
+    width: 400px;
+    padding: 0px 0px 24px 24px;
+}
+.attachment > label {
+    display: flex;
+    flex-direction: column;
+}
+
+.broadcast-attachments-btns {
+    display: flex;
+    justify-content: space-between;
+    width: 400px;
 }

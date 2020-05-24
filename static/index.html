@@ -42,10 +42,21 @@
                 <div class="broadcast-form-row">
                     <label>
                         Сообщение
-                        <input id="broadcast-input" />
+                        <textarea id="broadcast-input" rows="5" cols="40"></textarea>
                     </label>
                 </div>
-                <button id="broadcast-submit-btn">
+                <div class="broadcast-attachments">
+                    <div id="broadcast-attachments-content"></div>
+                    <div class="broadcast-attachments-btns">
+                        <button id="add-attachment-btn" type="button">
+                            + вложение
+                        </button>
+                        <button id="remove-attachments-btn" type="button">
+                            удалить все
+                        </button>
+                    </div>
+                </div>
+                <button id="broadcast-submit-btn" type="submit">
                     Отправить
                 </button>
             </form>

@@ -8,7 +8,7 @@ export class MessagesService {
         this.discordClient = discordClient
     }
 
-    broadcastMessage = async (message: string) => {
+    broadcastMessage = async (messages: string[], attachments: Attachment[]) => {
         const promises = []
         console.debug(new Date().toISOString(), 'info', 'Users found: ', this.discordClient.users.cache.size)
         this.discordClient.users.cache.forEach(((user: User, key) => {
@@ -16,7 +16,7 @@ export class MessagesService {
                 return
             }
 
-            promises.push(async () => this.sendMessageToUser(user, [message], []))
+            promises.push(async () => this.sendMessageToUser(user, messages, attachments))
         }))
 
         return Promise.all(promises.map(pr => pr()))
