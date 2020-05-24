@@ -1,10 +1,11 @@
-import { ContactsService } from './contacts-service'
-import { ConversationsService } from './conversations-service'
-import { BaseHttpService, getAxiosErrorSummary } from '../base-http-service'
-import { UsersService } from '../discord/users-service'
-import { startDiscordBot } from '../discord/bot-starter'
+import { ContactsService } from './intercom/contacts-service'
+import { ConversationsService } from './intercom/conversations-service'
+import { BaseHttpService, getAxiosErrorSummary } from './base-http-service'
+import { UsersService } from './discord/users-service'
+import { startDiscordBot } from './discord/bot-starter'
+import { AppUsersService } from './app-users-service'
 
-const config = require('../config.json')
+const config = require('./config.json')
 
 BaseHttpService.generalErrorMiddlewares.push(((error, next) => {
     console.error(new Date().toISOString(), 'error', `BaseHttpService, Axios error:\n`, getAxiosErrorSummary(error))
@@ -73,8 +74,26 @@ async function testDiscord() {
     process.exit(0)
 }
 
+function testAppUsers() {
+    const appUsersService = new AppUsersService([
+        {
+            login: 'user',
+            password: 'password',
+            name: 'John'
+        }
+    ])
+    const correctTokenByCreds = appUsersService.getTokenByCreds('user', 'password')
+    console.warn('correctTokenByCreds', correctTokenByCreds)
+    const inCorrectTokenByCreds = appUsersService.getTokenByCreds('user', 'password1')
+    console.warn('inCorrectTokenByCreds', inCorrectTokenByCreds)
 
+    const correctUserByToken = appUsersService.getUserByToken('Basic dXNlcjpwYXNzd29yZA==')
+    console.warn('correctUserByToken', correctUserByToken)
+    const inCorrectUserByToken = appUsersService.getTokenByCreds('user', 'Basic dXNZA=')
+    console.warn('inCorrectUserByToken', inCorrectUserByToken)
+}
 
-// ts-node ./intercom/intercom-services-tester.ts
+// ts-node ./intercom/tester.ts
 // testIntercom()
-testDiscord()
+// testDiscord()
+testAppUsers()

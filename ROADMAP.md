@@ -6,7 +6,9 @@
 - [x] Feature/Discord bot welcomes new users
 - [x] Feature/Copying new discord users to intercom
 - [x] readme with description of setup
-- [ ] Feature/html page with form for broadcast
+- [x] Feature/html page with form for broadcast
+- [x] Feature/html page with copy clients
+- [x] auth for all exposed api
 - [ ] Feature/Media (photo) and documents in conversation
 - [ ] Dockerize app
 - [ ] E2E tests

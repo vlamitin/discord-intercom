@@ -31,7 +31,7 @@ Integration between discord and intercom
 ## Development tips
 - while getting new discord token is free, creating new intercom account needs you to fill credit card details to gain trial  
 - use ngrok to get https endpoint
-- use `ts-node ./intercom/intercom-services-tester.ts` to test your external requests
+- use `ts-node ./intercom/tester.ts` to test your services
 
 ## License
 - TODO

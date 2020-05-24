@@ -2,5 +2,7 @@
   "port": 3002,
   "discordBotToken": "M2NfNDQxM=",
   "intercomApiUrl": "https://api.intercom.io",
+  "intercomClientID": "asdfasdf-asdfasd-gry4wer-wertyert-erty",
+  "intercomAppID": "iqwp12kl",
   "intercomAppToken": "Y3ZTI5Zjo="
 }

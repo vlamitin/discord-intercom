@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <title>discord-intercom</title>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="/frontend/favicon.ico">
+        <link href="styles.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <div id="user-info" class="user-info" style="display: none">
+            <div id="user-info-content"></div>
+            <button id="logout-btn">
+                Выйти
+            </button>
+        </div>
+
+        <form id="login-form">
+            <div class="login-form-row">
+                <label>
+                    Логин
+                    <input id="login-input" />
+                </label>
+            </div>
+            <div class="login-form-row">
+                <label>
+                    Пароль
+                    <input id="password-input" type="password"/>
+                </label>
+            </div>
+            <div id="login-err-content" class="login-err-content"></div>
+            <button id="login-submit-btn">
+                Войти
+            </button>
+        </form>
+
+        <div id="broadcast-block" style="display: none">
+            <hr />
+            <h2>Отправка сообщения всем пользователям</h2>
+            <form id="broadcast-form">
+                <div class="broadcast-form-row">
+                    <label>
+                        Сообщение
+                        <input id="broadcast-input" />
+                    </label>
+                </div>
+                <button id="broadcast-submit-btn">
+                    Отправить
+                </button>
+            </form>
+
+            <div id="broadcast-result">
+                <div id="broadcast-result-content"></div>
+                <button id="one-more-message-btn">
+                    Отправить ещё одно сообщение
+                </button>
+            </div>
+        </div>
+
+        <div id="copy-users-block" style="display: none">
+            <hr />
+            <h2>Копировать всех пользователей из дискорда в интерком</h2>
+
+            <button id="copy-users-btn">
+                Копировать
+            </button>
+
+            <div id="copy-users-result">
+                <pre id="copy-users-result-content"></pre>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript" src="index.js"></script>
+</html>

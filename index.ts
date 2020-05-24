@@ -1,4 +1,5 @@
 import * as express from 'express'
+import * as path from 'path'
 import * as bodyParser from 'body-parser'
 import { setRoutes } from './routes'
 import { Client } from 'discord.js'
@@ -15,11 +16,15 @@ import { ConversationsService } from './intercom/conversations-service'
 import { GuildMembersChangeHandlerService } from './discord/guild-members-change-handler-service'
 import { Config } from './config'
 import { SerializedState } from './serialized-state'
+import { AppUsersService } from './app-users-service'
+import { AppIntercomAuthService } from './app-intercom-auth-service'
 
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')
 
 export interface Services {
+    appUsersService: AppUsersService
+    appIntercomAuthService: AppIntercomAuthService
     discordMessagesService: MessagesService
     discordUsersService: UsersService
     discordMessagesHandlerService: MessagesHandlerService
@@ -32,6 +37,11 @@ export interface Services {
 }
 
 function initServices(discordClient: Client): Services {
+    const appUsersService = new AppUsersService(serializedState.users)
+    const appIntercomAuthService = new AppIntercomAuthService(
+        config.intercomClientID,
+        config.intercomAppID
+    )
     const discordMessagesService = new MessagesService(discordClient)
     const discordUsersService = new UsersService(discordClient)
     const intercomContactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
@@ -51,6 +61,8 @@ function initServices(discordClient: Client): Services {
     )
 
     return {
+        appUsersService,
+        appIntercomAuthService,
         discordMessagesService,
         discordUsersService,
         intercomContactsService,
@@ -85,6 +97,7 @@ async function startControllerServer(services: Services): Promise<void> {
 
     const appServer: express.Express = express()
 
+    appServer.use(express.static(path.join(__dirname, './static')))
     appServer.use(bodyParser.json())
     appServer.all('*', (req, res, next) => {
         console.debug(new Date().toISOString(), 'info', req.method, req.path)

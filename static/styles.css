@@ -1,0 +1,18 @@
+.login-form-row {
+    width: 160px;
+    margin-bottom: 16px;
+}
+
+.login-err-content {
+    color: red;
+    padding-bottom: 16px;
+}
+
+.broadcast-form-row {
+    width: 160px;
+    margin-bottom: 16px;
+}
+
+.user-info {
+    margin-bottom: 24px;
+}
