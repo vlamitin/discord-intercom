@@ -1,11 +1,11 @@
-import { ContactsService } from './intercom/contacts-service'
-import { ConversationsService } from './intercom/conversations-service'
-import { BaseHttpService, getAxiosErrorSummary } from './base-http-service'
-import { UsersService } from './discord/users-service'
-import { startDiscordBot } from './discord/bot-starter'
-import { AppUsersService } from './app-users-service'
-import { parseMessageBody } from './intercom/webhooks-handler-service-utlls'
-import { MessagesService } from './discord/messages-service'
+import { ContactsService } from './services/intercom/contacts-service'
+import { ConversationsService } from './services/intercom/conversations-service'
+import { BaseHttpService, getAxiosErrorSummary } from './services/base-http-service'
+import { UsersService } from './services/discord/users-service'
+import { startDiscordBot } from './services/discord/bot-starter'
+import { AppUsersService } from './services/app-users-service'
+import { parseMessageBody } from './services/intercom/webhooks-handler-service-utlls'
+import { MessagesService } from './services/discord/messages-service'
 
 const config = require('./config.json')
 

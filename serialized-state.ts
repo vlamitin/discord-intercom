@@ -1,5 +1,5 @@
-import { WelcomeMessage } from './discord/domain/welcome-message'
-import { AppUser } from './domain/app-user'
+import { WelcomeMessage } from './services/discord/domain/welcome-message'
+import { AppUser } from './services/domain/app-user'
 
 export interface SerializedState {
     welcomeMessages: WelcomeMessage[]
