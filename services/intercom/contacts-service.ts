@@ -1,4 +1,4 @@
-import { GET, NextMiddleware, POST, RequestError } from '../base-http-service'
+import { DELETE, GET, NextMiddleware, POST, RequestError } from '../base-http-service'
 import { Contact, ContactSearchResponse, NewContact, NewDiscordContact, validateContact } from './domain/contact'
 import { BaseIntercomHttpService } from './base-intercom-http-service'
 import { AxiosError } from 'axios'
@@ -9,10 +9,13 @@ export class ContactsService extends BaseIntercomHttpService {
         super(serverUrl, token)
     }
 
-    getAllContacts = (): Promise<Contact[]> => {
-        return super.send<Contact[]>({
+    getFirst150Contacts = (): Promise<{ data: Contact[]}> => {
+        return super.send<{ data: Contact[]}>({
             method: GET,
             url: '/contacts',
+            params: {
+                per_page: 150
+            }
         })
     }
 
@@ -53,6 +56,8 @@ export class ContactsService extends BaseIntercomHttpService {
             return
         }
 
+        console.debug(new Date().toISOString(), 'info', 'copying to intercom ...', name)
+
         return super.send<Contact>({
             method: POST,
             url: '/contacts',
@@ -61,6 +66,13 @@ export class ContactsService extends BaseIntercomHttpService {
             errorMiddlewares: [(error: RequestError, next: NextMiddleware): void => {
                 throw error
             }]
+        })
+    }
+
+    deleteContact = (intercomId: string): Promise<void> => {
+        return super.send<void>({
+            method: DELETE,
+            url: `/contacts/${intercomId}`,
         })
     }
 }

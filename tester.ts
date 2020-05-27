@@ -6,6 +6,8 @@ import { startDiscordBot } from './services/discord/bot-starter'
 import { AppUsersService } from './services/app-users-service'
 import { parseMessageBody } from './services/intercom/webhooks-handler-service-utlls'
 import { MessagesService } from './services/discord/messages-service'
+import { processPromises } from './utils/promise-utils'
+import { User } from "discord.js"
 
 const config = require('./config.json')
 
@@ -13,12 +15,44 @@ BaseHttpService.generalErrorMiddlewares.push(((error, next) => {
     console.error(new Date().toISOString(), 'error', `BaseHttpService, Axios error:\n`, getAxiosErrorSummary(error))
 }))
 
+async function sleep(secs: number): Promise<void> {
+    return new Promise(resolve => {
+        setTimeout(resolve, secs * 1000)
+    })
+}
+
 async function testIntercom() {
     const contactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
     const conversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
 
-    // const contacts = await contactsService.getAllContacts()
-    // console.log(JSON.stringify(contacts))
+    // const contactsRes = await contactsService.getFirst150Contacts()
+    // console.log(JSON.stringify(contactsRes))
+
+    async function delete150() {
+        const contactsRes = await contactsService.getFirst150Contacts()
+        const deletedResults = await processPromises(contactsRes.data.map(contact => {
+            return async () => {
+                const res = await contactsService.deleteContact(contact.id)
+                console.debug(new Date().toISOString(), 'info', 'deleted: ', JSON.stringify(res))
+                return res
+            }
+        }), 10)
+    }
+    processPromises([
+        delete150,
+        () => sleep(10),
+        delete150,
+        () => sleep(10),
+        delete150,
+        () => sleep(10),
+        delete150,
+        () => sleep(10),
+        delete150,
+        () => sleep(10),
+        delete150,
+    ], 1)
+
+
     //
     // const created = await contactsService.copyContactFromDiscord({
     //     "role":"user",
@@ -26,6 +60,46 @@ async function testIntercom() {
     //     "name":"vlamitin"
     // })
     // console.log(created)
+
+    // const results = await Promise.all(
+    //     Array.from(new Array(1000)).map((_, i) => {
+    //         return contactsService.copyContactFromDiscord('107123' + i, '1000_user_' + i, '')
+    //     })
+    // )
+    // console.log(JSON.stringify(results))
+
+    // const promises = Array.from(new Array(1000)).map((_, i) => {
+    //     return async () => {
+    //         try {
+    //             await contactsService.copyContactFromDiscord(
+    //                 '12335-0964356' + i,
+    //                 '1000_3_user_' + i,
+    //                 ''
+    //             )
+    //         } catch (e) {
+    //             console.error(new Date().toISOString(), 'error', 'error while copying to intercom user ', i, getAxiosErrorSummary(e))
+    //         }
+    //     }
+    // })
+    //
+    // await processPromises(promises, 10)
+
+    // // const resultt = await processPromises(Array.from(new Array(5000)).map((_, i) => {
+    // const resultt = await processPromises(Array.from(new Array(20)).map((_, i) => {
+    //     return async () => {
+    //         return new Promise(resolve => {
+    //             // setTimeout(() => {
+    //                 console.log(i, '- timestamp -', Date.now())
+    //                 resolve(i)
+    //             // }, 10000 * Math.random())
+    //             // }, 1000)
+    //         })
+    //     }
+    // // }), 1000)
+    // }), 3)
+    //
+    // console.log('done', JSON.stringify(resultt))
+
     //
     // const replied = await conversationsService.replyToConversation(
     //     '27122530513',
@@ -131,7 +205,7 @@ function testHtmlParse() {
 }
 
 // ts-node ./intercom/tester.ts
-// testIntercom()
-testDiscord()
+testIntercom()
+// testDiscord()
 // testAppUsers()
 // testHtmlParse()

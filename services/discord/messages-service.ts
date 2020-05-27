@@ -1,5 +1,6 @@
 import { Client, Message, MessageAttachment, User } from 'discord.js'
 import { Attachment } from './domain/attachment'
+import { processPromises } from '../../utils/promise-utils'
 
 export class MessagesService {
     discordClient: Client
@@ -19,7 +20,7 @@ export class MessagesService {
             promises.push(async () => this.sendMessageToUser(user, messages, attachments))
         }))
 
-        return Promise.all(promises.map(pr => pr()))
+        return processPromises(promises, 10)
     }
 
     sendMessage = (

@@ -120,6 +120,9 @@ export abstract class BaseHttpService {
 }
 
 export function getAxiosErrorSummary(error: AxiosError): object {
+    if (!error?.isAxiosError) {
+        return error
+    }
     return {
         baseURL: error.config?.baseURL,
         url: error.request.url || error.config?.url,

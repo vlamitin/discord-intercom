@@ -2,6 +2,7 @@ import { UsersService } from './discord/users-service'
 import { ContactsService } from './intercom/contacts-service'
 import { User } from 'discord.js'
 import { getAxiosErrorSummary } from './base-http-service'
+import { processPromises } from '../utils/promise-utils'
 
 export interface DiscordToIntercomResult {
     discordUsersCount: number
@@ -53,7 +54,7 @@ export class SyncUsersService {
             })
         })
 
-        await Promise.all(promises.map(pr => pr()))
+        await processPromises(promises, 10)
 
         return {
             discordUsersCount,
