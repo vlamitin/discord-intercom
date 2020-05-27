@@ -15,8 +15,8 @@ Integration between discord and intercom
 - [get discord token](https://discordjs.guide/preparations/setting-up-a-bot-application.html#your-token)
 - add discord bot to your discord server: https://discord.com/developers/applications -> new application -> open this created application -> bot tab -> add bot -> add privileges to bot (ingeger 523328) -> general info tab -> copy CLIENT ID -> open link in browser https://discordapp.com/oauth2/authorize?client_id=<CLIENT ID>&scope=bot -> add bot to your server  
 
-
 - [get intercom token](https://developers.intercom.com/building-apps/docs/authentication-types#section-how-to-get-your-access-token)
+- [get intercom app id and intercom client id](https://app.intercom.com/a/apps/<INTERCOM_APP_ID>/developer-hub/app-packages/<PACKAGE_ID>/basic-info)
 - [set intercom webhook endpoint](https://developers.intercom.com/building-apps/docs/setting-up-webhooks)
 - set `https://<your domain name>/api/intercom/hooks` as webhook endpoint in intercom account 
 
