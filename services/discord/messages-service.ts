@@ -41,7 +41,7 @@ export class MessagesService {
         textRows: string[],
         attachments: Attachment[]
     ): Promise<Message | void> => {
-        if (textRows.length === 0) {
+        if (textRows.length === 0 && attachments.length === 0) {
             console.debug(new Date().toISOString(), 'error', 'cannot send empty message!')
             return
         }
