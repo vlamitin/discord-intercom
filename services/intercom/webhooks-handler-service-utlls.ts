@@ -10,6 +10,8 @@ export function parseMessageBody(htmlPart: string): ParsedMessage {
         textRows: [],
         imageUrls: []
     }
+
+    /* TODO забенчмаркать. А вдруг это долго? Мб эффективнее создать 1 инстанс jsdom.JSDOM работать внутри него? */
     const dom = new jsdom.JSDOM(`<!DOCTYPE html>${htmlPart}`)
 
     Array.from(dom.window.document.querySelectorAll('p'))

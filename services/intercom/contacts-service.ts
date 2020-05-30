@@ -70,9 +70,10 @@ export class ContactsService extends BaseIntercomHttpService {
     }
 
     deleteContact = (intercomId: string): Promise<void> => {
-        return super.send<void>({
-            method: DELETE,
-            url: `/contacts/${intercomId}`,
-        })
+        throw new Error('DELETED CONTACT CANNOT BE CREATED AGAIN (user with same external_id)')
+        // return super.send<void>({
+        //     method: DELETE,
+        //     url: `/contacts/${intercomId}`,
+        // })
     }
 }

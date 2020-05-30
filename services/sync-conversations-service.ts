@@ -27,7 +27,7 @@ export class SyncConversationsService {
     ): Promise<void> => {
         const intercomContact: Contact = await this.contactsService.getContactByExternalId(discordUserId)
         if (!intercomContact) {
-            console.warn(new Date().toISOString(), 'warn', 'Failed to send discord message to intercom: user not found in intercom')
+            console.warn(new Date().toISOString(), 'warn', `Failed to send discord message ${content} to intercom: user with discord id ${discordUserId} not found in intercom`)
             return
         }
 
@@ -73,15 +73,44 @@ export class SyncConversationsService {
 
     sendMessageFromIntercomToDiscordContact = async (
         discordUserId: string,
+        intercomContactId: string,
         intercomConversationId: string,
         textRows: string[],
         attachments: Attachment[]
     ): Promise<void> => {
-        await this.discordMessagesService.sendMessage(
+        const sentMessage = await this.discordMessagesService.sendMessage(
             discordUserId,
             textRows,
             attachments
         )
-        await this.conversationsService.markConversationAsRead(intercomConversationId)
+
+        if (sentMessage) {
+            await this.conversationsService.markConversationAsRead(intercomConversationId)
+        } else {
+            const shortMessage: string = getShortMessage(textRows, attachments)
+            console.warn(new Date().toISOString(), 'warn', `failed to send message with content ${shortMessage} to person with discordUserId ${discordUserId} and intercomContactId ${intercomContactId}, sending warn reply to intercom admin ...`)
+            await this.conversationsService.replyToConversation(
+                intercomConversationId,
+                intercomContactId,
+                `(!) Ошибка при отправке пользователю в дискорд сообщения ${shortMessage}`,
+                []
+            )
+        }
     }
+}
+
+function getShortMessage(textRows: string[], attachments: Attachment[]): string {
+    let result = ''
+    if (textRows.length > 0) {
+        result += `"${textRows.join(' ').slice(0, 6)}..."`
+    }
+
+    if (attachments.length > 0) {
+        if (result) {
+            result += ' и '
+        }
+        result += `${attachments.length} вложений`
+    }
+
+    return result
 }

@@ -25,32 +25,30 @@ async function testIntercom() {
     const contactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
     const conversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
 
-    // const contactsRes = await contactsService.getFirst150Contacts()
-    // console.log(JSON.stringify(contactsRes))
+    const contactsRes = await contactsService.getFirst150Contacts()
+    console.log(JSON.stringify(contactsRes))
 
-    async function delete150() {
-        const contactsRes = await contactsService.getFirst150Contacts()
-        const deletedResults = await processPromises(contactsRes.data.map(contact => {
-            return async () => {
-                const res = await contactsService.deleteContact(contact.id)
-                console.debug(new Date().toISOString(), 'info', 'deleted: ', JSON.stringify(res))
-                return res
-            }
-        }), 10)
-    }
-    processPromises([
-        delete150,
-        () => sleep(10),
-        delete150,
-        () => sleep(10),
-        delete150,
-        () => sleep(10),
-        delete150,
-        () => sleep(10),
-        delete150,
-        () => sleep(10),
-        delete150,
-    ], 1)
+    // async function delete150() {
+    //     const contactsRes = await contactsService.getFirst150Contacts()
+    //     const deletedResults = await processPromises(contactsRes.data.map(contact => {
+    //         return async () => {
+    //             const res = await contactsService.deleteContact(contact.id)
+    //             console.debug(new Date().toISOString(), 'info', 'deleted: ', JSON.stringify(res))
+    //             return res
+    //         }
+    //     }), 10)
+    // }
+    // processPromises([
+    //     delete150,
+    //     () => sleep(40),
+    //     delete150,
+    //     () => sleep(40),
+    //     delete150,
+    //     () => sleep(40),
+    //     delete150,
+    //     () => sleep(40),
+    //     delete150,
+    // ], 1)
 
 
     //
@@ -200,7 +198,9 @@ function testAppUsers() {
 }
 
 function testHtmlParse() {
+    console.time('jsDom parse')
     const testMessageBody4 = '<p>sadf<br>asdf<br></p>\n<div class="intercom-container"><img src="https://downloads.intercomcdn.com/i/o/211782493/e438dfe869b779643afc641a/EARL.png"></div><p>sadf<br>sadfasdf</p>'
+    console.timeEnd('jsDom parse')
     console.log('parseMessageBody', parseMessageBody(testMessageBody4))
 }
 

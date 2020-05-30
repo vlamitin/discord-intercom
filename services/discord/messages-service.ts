@@ -30,7 +30,7 @@ export class MessagesService {
     ): Promise<Message | void> => {
         const discordUser: User = this.discordClient.users.cache.find(user => user.id === discordUserId)
         if (!discordUser) {
-            console.debug(new Date().toISOString(), 'warn', 'no user found with id: ', discordUserId)
+            console.warn(new Date().toISOString(), 'warn', 'no user found with id: ', discordUserId)
             return
         }
 

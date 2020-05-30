@@ -150,7 +150,7 @@ export class ConversationsService extends BaseIntercomHttpService {
                     if (response?.data?.id === conversationId && response?.data?.read === true) {
                         console.debug(new Date().toISOString(), 'info', 'marked as read conversation ', conversationId)
                     } else {
-                        console.debug(new Date().toISOString(), 'warn', 'failed to mark conversation as read ', conversationId)
+                        console.warn(new Date().toISOString(), 'warn', 'failed to mark conversation as read ', conversationId)
                     }
                     next()
                 }
