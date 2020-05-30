@@ -1,3 +1,5 @@
+import * as path from 'path'
+import * as uuid from 'uuid'
 import { ContactsService } from './services/intercom/contacts-service'
 import { ConversationsService } from './services/intercom/conversations-service'
 import { BaseHttpService, getAxiosErrorSummary } from './services/base-http-service'
@@ -8,6 +10,9 @@ import { parseMessageBody } from './services/intercom/webhooks-handler-service-u
 import { MessagesService } from './services/discord/messages-service'
 import { processPromises } from './utils/promise-utils'
 import { User } from "discord.js"
+import { AppSerializedStateService } from './services/app-serialized-state-service'
+import { SerializedState } from './serialized-state'
+import { ReplyMessageConversationId } from './services/intercom/domain/conversation'
 
 const config = require('./config.json')
 
@@ -22,11 +27,18 @@ async function sleep(secs: number): Promise<void> {
 }
 
 async function testIntercom() {
-    const contactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
-    const conversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
+    const serializedState: SerializedState = require('./serialized-state.json')
 
-    const contactsRes = await contactsService.getFirst150Contacts()
-    console.log(JSON.stringify(contactsRes))
+    const contactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
+    const appSerializedStateService = new AppSerializedStateService(serializedState, path.resolve(__dirname, './serialized-state.json'))
+    const conversationsService = new ConversationsService(
+        config.intercomApiUrl,
+        config.intercomAppToken,
+        appSerializedStateService
+    )
+
+    // const contactsRes = await contactsService.getFirst150Contacts()
+    // console.log(JSON.stringify(contactsRes))
 
     // async function delete150() {
     //     const contactsRes = await contactsService.getFirst150Contacts()
@@ -99,12 +111,14 @@ async function testIntercom() {
     // console.log('done', JSON.stringify(resultt))
 
     //
-    // const replied = await conversationsService.replyToConversation(
-    //     '27122530513',
-    //     '5ec0f1076fdffab37a4a37fa',
-    //     'bla',
-    // )
-    // console.log(replied)
+    const replied = await conversationsService.replyToConversation(
+        '27122530513',
+        '5ec0f1076fdffab37a4a37fa',
+        'bla',
+        'asdfasdf',
+        []
+    )
+    console.log(replied)
 
     // const assigned = await conversationsService.autoAssignConversationToAdmin(
     //     '27122530513',
@@ -204,8 +218,35 @@ function testHtmlParse() {
     console.log('parseMessageBody', parseMessageBody(testMessageBody4))
 }
 
+function testSerializedStateService() {
+    // const serializedState: SerializedState = require('./serialized-state-2.json')
+    // const serializedStateService = new AppSerializedStateService(serializedState, path.join(__dirname, './serialized-state-2.json'))
+    //
+    // console.log('serializedStateService.state.failedConversationReplies', serializedStateService.state.failedConversationReplies.length)
+    //
+    // Array.from(new Array(1000)).forEach((_, i) => {
+    //     setTimeout(() => {
+    //         serializedStateService.setState({
+    //             ...serializedStateService.state,
+    //             failedConversationRepliesMap: [
+    //                 ...serializedStateService.state.failedConversationReplies,
+    //                 {
+    //                     date: new Date().toISOString(),
+    //                     conversationId: String(i),
+    //                     contactId: '2341234',
+    //                     discordUsername: '2341234',
+    //                     content: '2341234',
+    //                     attachmentUrls: ['2341234']
+    //                 }
+    //             ]
+    //         })
+    //     }, Math.random() * 1000)
+    // })
+}
+
 // ts-node ./intercom/tester.ts
 testIntercom()
 // testDiscord()
 // testAppUsers()
 // testHtmlParse()
+// testSerializedStateService()

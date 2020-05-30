@@ -22,6 +22,7 @@ export class SyncConversationsService {
 
     sendMessageFromDiscordToIntercomAdmin = async (
         discordUserId: string,
+        discordUsername: string,
         content: string,
         attachmentUrls: string[]
     ): Promise<void> => {
@@ -47,6 +48,7 @@ export class SyncConversationsService {
                         console.warn(new Date().toISOString(), 'warn', 'Attachments found when first message - sending second message...')
                         return this.sendMessageFromDiscordToIntercomAdmin(
                             discordUserId,
+                            discordUsername,
                             '...',
                             attachmentUrls
                         )
@@ -65,6 +67,7 @@ export class SyncConversationsService {
         await this.conversationsService.replyToConversation(
             latestConversation.id,
             intercomContact.id,
+            discordUsername,
             content,
             attachmentUrls
         )
@@ -73,6 +76,7 @@ export class SyncConversationsService {
 
     sendMessageFromIntercomToDiscordContact = async (
         discordUserId: string,
+        discordUsername: string,
         intercomContactId: string,
         intercomConversationId: string,
         textRows: string[],
@@ -92,6 +96,7 @@ export class SyncConversationsService {
             await this.conversationsService.replyToConversation(
                 intercomConversationId,
                 intercomContactId,
+                discordUsername,
                 `(!) Ошибка при отправке пользователю в дискорд сообщения ${shortMessage}`,
                 []
             )

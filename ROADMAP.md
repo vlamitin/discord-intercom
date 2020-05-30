@@ -12,5 +12,8 @@
 - [x] (!DONE EXCEPT WHEN DISCORD USER SENDS THE VERY FIRST MESSAGE TO ADMIN) Feature/Attachments in conversation
 - [x] Feature/Attachments in conversation from discord to intercom when it is first conversation
 - [x] Dockerize app
-- [ ] Segmenting users for broadcast
+- [x] Negative conversation scenarios handling 
+- [ ] Segmenting users for broadcast (with UI editing)
+- [ ] Changing welcome message from UI
+- [ ] Saving serialised-state.json on its change
 - [ ] E2E tests

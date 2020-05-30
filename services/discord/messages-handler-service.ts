@@ -22,6 +22,7 @@ export class MessagesHandlerService {
         await this.syncConversationsService
             .sendMessageFromDiscordToIntercomAdmin(
                 message.author.id,
+                message.author.username,
                 message.content,
                 attachments
             )

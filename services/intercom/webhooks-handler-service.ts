@@ -20,12 +20,14 @@ export class WebhooksHandlerService {
                 return
             case WebhookTopic.CONVERSATION_ADMIN_CREATED: {
                 const externalId: string = intercomEvent.data.item.user.user_id
+                const intercomContactName: string = intercomEvent.data.item.user.name
                 const intercomContactId: string = intercomEvent.data.item.user.id
                 const message: ParsedMessage = parseMessageBody(intercomEvent.data.item.conversation_message.body)
                 const conversationId: string = intercomEvent.data.item.id
 
                 return this.syncConversationsService.sendMessageFromIntercomToDiscordContact(
                     externalId,
+                    intercomContactName,  // assume that itercom username and discord username are the same
                     intercomContactId,
                     conversationId,
                     message.textRows,
@@ -39,6 +41,7 @@ export class WebhooksHandlerService {
             }
             case WebhookTopic.CONVERSATION_ADMIN_REPLIED: {
                 const externalId: string = intercomEvent.data.item.user.user_id
+                const intercomContactName: string = intercomEvent.data.item.user.name
                 const intercomContactId: string = intercomEvent.data.item.user.id
                 const message: ParsedMessage = parseMessageBody(intercomEvent.data.item
                     ?.conversation_parts
@@ -56,6 +59,7 @@ export class WebhooksHandlerService {
 
                 return this.syncConversationsService.sendMessageFromIntercomToDiscordContact(
                     externalId,
+                    intercomContactName, // assume that itercom username and discord username are the same
                     intercomContactId,
                     conversationId,
                     message.textRows,

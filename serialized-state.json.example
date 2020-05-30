@@ -15,5 +15,6 @@
       "password": "password",
       "name": "John"
     }
-  ]
+  ],
+  "failedConversationRepliesMap": {}
 }

@@ -18,6 +18,10 @@ import { Config } from './config'
 import { SerializedState } from './serialized-state'
 import { AppUsersService } from './services/app-users-service'
 import { AppIntercomAuthService } from './services/app-intercom-auth-service'
+import { AppJobsService } from './services/app-jobs-service'
+import { AppSerializedStateService } from './services/app-serialized-state-service'
+import { IntervalJob } from './utils/interval-job'
+import { processPromises } from './utils/promise-utils'
 
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')
@@ -25,6 +29,8 @@ const serializedState: SerializedState = require('./serialized-state.json')
 export interface Services {
     appUsersService: AppUsersService
     appIntercomAuthService: AppIntercomAuthService
+    appJobsService: AppJobsService
+    appSerializedStateService: AppSerializedStateService
     discordMessagesService: MessagesService
     discordUsersService: UsersService
     discordMessagesHandlerService: MessagesHandlerService
@@ -38,6 +44,8 @@ export interface Services {
 
 function initServices(discordClient: Client): Services {
     const appUsersService = new AppUsersService(serializedState.users)
+    const appJobsService = new AppJobsService([])
+    const appSerializedStateService = new AppSerializedStateService(serializedState, path.resolve(__dirname, './serialized-state.json'))
     const appIntercomAuthService = new AppIntercomAuthService(
         config.intercomClientID,
         config.intercomAppID
@@ -45,7 +53,11 @@ function initServices(discordClient: Client): Services {
     const discordMessagesService = new MessagesService(discordClient)
     const discordUsersService = new UsersService(discordClient)
     const intercomContactsService = new ContactsService(config.intercomApiUrl, config.intercomAppToken)
-    const intercomConversationsService = new ConversationsService(config.intercomApiUrl, config.intercomAppToken)
+    const intercomConversationsService = new ConversationsService(
+        config.intercomApiUrl,
+        config.intercomAppToken,
+        appSerializedStateService
+    )
     const syncUsersService = new SyncUsersService(discordUsersService, intercomContactsService)
     const syncConversationsService = new SyncConversationsService(
         intercomContactsService,
@@ -63,6 +75,8 @@ function initServices(discordClient: Client): Services {
     return {
         appUsersService,
         appIntercomAuthService,
+        appJobsService,
+        appSerializedStateService,
         discordMessagesService,
         discordUsersService,
         intercomContactsService,
@@ -88,6 +102,44 @@ async function start(): Promise<void> {
     discordClient.on('message', discordMessagesHandlerService.handleMessage)
     discordClient.on('guildMemberAdd', discordGuildMembersChangeHandlerService.handleMemberAdd)
     discordClient.on('guildMemberRemove', discordGuildMembersChangeHandlerService.handleMemberRemove)
+
+    let resendConversationRepliesJob = new IntervalJob(60 * 1000)
+    resendConversationRepliesJob.startInterval(async () => {
+        const failedReplyIds: string[] = Object.keys(services.appSerializedStateService.state.failedConversationRepliesMap || {})
+        if (failedReplyIds.length === 0) {
+            return
+        }
+        console.debug(new Date().toISOString(), 'info', 'Starting resend ', failedReplyIds.length, 'failed replies ...')
+
+        let resendCounter: number = 0
+
+        await processPromises(failedReplyIds.map(replyId => {
+            return async () => {
+                const { conversationId, contactId, discordUsername, content, attachmentUrls }
+                    = services.appSerializedStateService.state.failedConversationRepliesMap[replyId]
+                console.debug(new Date().toISOString(), 'info', `Resending message for user ${discordUsername} ...`)
+
+                const reply = await services.intercomConversationsService.replyToConversation(
+                    conversationId,
+                    contactId,
+                    discordUsername,
+                    '(!) Повторная отправка: \n' + content,
+                    attachmentUrls,
+                )
+                if (reply) {
+                    console.debug(new Date().toISOString(), 'info', `Resending message for user ${discordUsername} success`)
+                    resendCounter++
+                } else {
+                    console.debug(new Date().toISOString(), 'warn', `Resending message for user ${discordUsername} failed`)
+                }
+
+                services.appSerializedStateService.removeFailedReply(replyId)
+            }
+        }), 10)
+
+        console.debug(new Date().toISOString(), 'info', 'Resending finished, resent: ', resendCounter)
+    })
+    services.appJobsService.setNewJob(resendConversationRepliesJob)
 
     return startControllerServer(services)
 }

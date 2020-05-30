@@ -1,4 +1,5 @@
-import { GET, POST, PUT } from '../base-http-service'
+import * as uuid from 'uuid'
+import { GET, getAxiosErrorSummary, POST, PUT } from '../base-http-service'
 import { BaseIntercomHttpService } from './base-intercom-http-service'
 import {
     ContactConversationReplyMessage,
@@ -7,16 +8,21 @@ import {
     ReplyMessageConversationId,
     validateContactConversationReplyMessage
 } from './domain/conversation'
+import { AppSerializedStateService } from '../app-serialized-state-service'
 
 export class ConversationsService extends BaseIntercomHttpService {
 
-    constructor(serverUrl: string, token: string) {
+    appSerializedStateService: AppSerializedStateService
+
+    constructor(serverUrl: string, token: string, appSerializedStateService: AppSerializedStateService) {
         super(serverUrl, token)
+        this.appSerializedStateService = appSerializedStateService
     }
 
     replyToConversation = (
         conversationId: ReplyMessageConversationId,
         contactId: string,
+        discordUsername: string,
         content: string,
         attachmentUrls: string[]
     ): Promise<Conversation> => {
@@ -34,7 +40,7 @@ export class ConversationsService extends BaseIntercomHttpService {
 
         if (validationResult) {
             console.error(new Date().toISOString(), 'error',
-                `error while replying to conversation with id ${conversationId} from contact with id ${contactId} - ${validationResult}`
+                `error while replying to conversation with id ${conversationId} from contact with id ${contactId} and name ${discordUsername} - ${validationResult}`
             )
             return
         }
@@ -43,12 +49,39 @@ export class ConversationsService extends BaseIntercomHttpService {
             method: POST,
             url: `/conversations/${conversationId}/reply`,
             data: replyMessage
+        }, {
+            errorMiddlewares: [
+                (error => {
+                    console.error(new Date().toISOString(), 'error',
+                        `error while replying to conversation with id ${conversationId} from contact with id ${contactId} and name ${discordUsername} error - `,
+                        getAxiosErrorSummary(error)
+                    )
+
+                    if (error.response?.status === 404) {
+                        return
+                    }
+
+                    const newFailedReplyId: string = uuid.v4()
+                    console.debug(new Date().toISOString(), 'info', 'Saving failed conversation with id: ', newFailedReplyId)
+
+                    this.appSerializedStateService.setNewFailedReply(newFailedReplyId, {
+                        id: newFailedReplyId,
+                        date: new Date().toISOString(),
+                        conversationId,
+                        contactId,
+                        discordUsername,
+                        content,
+                        attachmentUrls
+                    })
+                })
+            ]
         })
             .then(replied => {
                 if (attachmentUrls.slice(5).length > 0) {
                     return this.replyToConversation(
                         conversationId,
                         contactId,
+                        discordUsername,
                         '...',
                         attachmentUrls.slice(5)
                     )

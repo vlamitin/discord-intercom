@@ -15,9 +15,10 @@
     "discord.js": "^12.2.0",
     "express": "^4.17.1",
     "jsdom": "^16.2.2",
+    "qs": "^6.9.4",
     "ts-node": "^8.10.1",
     "typescript": "^3.8.3",
-    "qs": "^6.9.4"
+    "uuid": "^8.1.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.6",
