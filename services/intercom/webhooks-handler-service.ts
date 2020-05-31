@@ -1,7 +1,7 @@
 import { WebhookEvent, WebhookTopic } from './domain/webhook-event'
 import { SyncConversationsService } from '../sync-conversations-service'
 import { extractFileNameFromUrl, ParsedMessage, parseMessageBody } from './webhooks-handler-service-utlls'
-import {fromIntercomExternalId} from './external-id-normalizer-utils'
+import { fromIntercomExternalId } from './external-id-normalizer-utils'
 import { Attachment } from '../discord/domain/attachment'
 
 export class WebhooksHandlerService {
