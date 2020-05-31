@@ -1,6 +1,13 @@
-import { DELETE, GET, NextMiddleware, POST, RequestError } from '../base-http-service'
-import { Contact, ContactSearchResponse, NewContact, NewDiscordContact, validateContact } from './domain/contact'
+import { GET, NextMiddleware, POST, PUT, RequestError } from '../base-http-service'
+import {
+    Contact,
+    ContactSearchResponse,
+    DiscordContactFull,
+    NewDiscordContact,
+    validateContact
+} from './domain/contact'
 import { BaseIntercomHttpService } from './base-intercom-http-service'
+import { toIntercomExternalId } from './external-id-normalizer-utils'
 import { AxiosError } from 'axios'
 
 export class ContactsService extends BaseIntercomHttpService {
@@ -9,8 +16,8 @@ export class ContactsService extends BaseIntercomHttpService {
         super(serverUrl, token)
     }
 
-    getFirst150Contacts = (): Promise<{ data: Contact[]}> => {
-        return super.send<{ data: Contact[]}>({
+    getFirst150Contacts = (): Promise<{ data: Contact[] }> => {
+        return super.send<{ data: Contact[] }>({
             method: GET,
             url: '/contacts',
             params: {
@@ -28,7 +35,7 @@ export class ContactsService extends BaseIntercomHttpService {
                 query: {
                     field: 'external_id',
                     operator: '=',
-                    value: externalId
+                    value: toIntercomExternalId(externalId)
                 }
             }
         })
@@ -44,7 +51,7 @@ export class ContactsService extends BaseIntercomHttpService {
     copyContactFromDiscord = (discordUserId: string, name: string, avatar: string): Promise<void | Contact | AxiosError> => {
         const newContact: NewDiscordContact = {
             role: 'user',
-            external_id: discordUserId,
+            external_id: toIntercomExternalId(discordUserId),
             name,
             avatar: avatar || ''
         }
