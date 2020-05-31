@@ -9,14 +9,16 @@ export class MessagesService {
         this.discordClient = discordClient
     }
 
-    broadcastMessage = async (messages: string[], attachments: Attachment[]) => {
+    broadcastMessage = async (messages: string[], attachments: Attachment[], userIds: Set<string>) => {
         const promises = []
         console.debug(new Date().toISOString(), 'info', 'Users found: ', this.discordClient.users.cache.size)
         this.discordClient.users.cache.forEach(((user: User, key) => {
             if (user.bot) {
                 return
             }
-
+            if (!userIds.has(user.id)) {
+                return
+            }
             promises.push(async () => this.sendMessageToUser(user, messages, attachments))
         }))
 

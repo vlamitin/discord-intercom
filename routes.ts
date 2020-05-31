@@ -13,6 +13,7 @@ export function setRoutes(
         intercomWebhooksService,
         syncUsersService,
         discordGuildMembersChangeHandlerService,
+        broadcastService
     } = services
 
     const authMiddleWare = (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -91,6 +92,7 @@ export function setRoutes(
     /* req.body should be
     {
         "message": "bla",
+        segments: []
         "attachments": [{
             "name": "file.txt",
             "url": "https://cdn.com/file.txt"
@@ -98,7 +100,7 @@ export function setRoutes(
     }
      */
     controllerServer.post('/api/discord/messages/broadcast', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        await discordMessagesService.broadcastMessage(req.body.message.split('\n'), req.body.attachments)
+        await broadcastService.broadcast(req.body.message.split('\n'), req.body.attachments, req.body.segments)
 
         res.status(200).send(JSON.stringify({ success: true }))
     })
