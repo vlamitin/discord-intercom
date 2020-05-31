@@ -82,6 +82,12 @@ export function setRoutes(
         res.status(200).send(JSON.stringify(users))
     })
 
+    controllerServer.get('/api/discord/roles', authMiddleWare, (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        const roles = discordUsersService.getAllRoles() || []
+
+        res.status(200).send(JSON.stringify(roles))
+    })
+
     /* req.body should be
     {
         "message": "bla",
