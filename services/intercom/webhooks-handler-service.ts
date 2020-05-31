@@ -1,6 +1,7 @@
 import { WebhookEvent, WebhookTopic } from './domain/webhook-event'
 import { SyncConversationsService } from '../sync-conversations-service'
 import { extractFileNameFromUrl, ParsedMessage, parseMessageBody } from './webhooks-handler-service-utlls'
+import { fromIntercomExternalId } from './external-id-normalizer-utils'
 import { Attachment } from '../discord/domain/attachment'
 
 export class WebhooksHandlerService {
@@ -40,7 +41,7 @@ export class WebhooksHandlerService {
                 )
             }
             case WebhookTopic.CONVERSATION_ADMIN_REPLIED: {
-                const externalId: string = intercomEvent.data.item.user.user_id
+                const externalId: string = fromIntercomExternalId(intercomEvent.data.item.user.user_id)
                 const intercomContactName: string = intercomEvent.data.item.user.name
                 const intercomContactId: string = intercomEvent.data.item.user.id
                 const message: ParsedMessage = parseMessageBody(intercomEvent.data.item
