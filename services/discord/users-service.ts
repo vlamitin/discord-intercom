@@ -1,4 +1,4 @@
-import { Client, User } from 'discord.js'
+import { Client, Role, User } from 'discord.js'
 
 export class UsersService {
     discordClient: Client
@@ -9,5 +9,9 @@ export class UsersService {
 
     getAllUsers = (): User[] => {
         return this.discordClient.users.cache.map(user => user)
+    }
+
+    getAllRoles = (): Role[] => {
+        return this.discordClient.guilds.cache.flatMap(g => g.roles.cache).map(v => v);
     }
 }

@@ -132,6 +132,7 @@ class BroadcastMessageModel {
     broadcastForm = document.querySelector('#broadcast-form')
     broadcastInput = document.querySelector('#broadcast-input')
     broadcastAttachmentsContent = document.querySelector('#broadcast-attachments-content')
+    broadcastSegmentsContent = document.querySelector('.broadcast-segments')
     addAttachmentBtn = document.querySelector('#add-attachment-btn')
     removeAttachmentsBtn = document.querySelector('#remove-attachments-btn')
     broadcastSubmitBtn = document.querySelector('#broadcast-submit-btn')
@@ -141,13 +142,15 @@ class BroadcastMessageModel {
     oneMoreMessageBtn = document.querySelector('#one-more-message-btn')
 
     token = ''
+    segments = []
 
     message = ''
 
     broadcastResultContentString = ''
 
-    constructor(token) {
+    constructor(token, segments) {
         this.token = token
+        this.segments = segments
 
         this.broadcastInput.addEventListener('input', this.handleMessageChange)
         this.broadcastAttachmentsContent.addEventListener('input', this.render)
@@ -157,14 +160,38 @@ class BroadcastMessageModel {
         this.oneMoreMessageBtn.addEventListener('click', this.handleOneMoreMessageClick)
     }
 
+    setSegments = segments => {
+        this.segments = segments
+        this.render()
+    }
+
     setToken = token => {
         this.token = token
+        this.updateSegmentsList();
         this.render()
+    }
+
+    updateSegmentsList = () => {
+        fetch('/api/discord/roles', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.token
+            }
+        })
+            .then(res => {
+                return res.json()
+            })
+            .then(res => {
+                this.setSegments(res.map(role => {
+                    return {name: role.name, id: role.id};
+                }))
+            })
     }
 
     valid = () => {
         if (!this.message) return false
-        if(this.getAttachmentData().some(attachment => !attachment.url || !attachment.name)) return false
+        if (this.getAttachmentData().some(attachment => !attachment.url || !attachment.name)) return false
         return true
     }
 
@@ -247,6 +274,8 @@ class BroadcastMessageModel {
             },
             body: JSON.stringify({
                 message: this.message,
+                segments: Array.prototype.map.call(
+                    document.querySelectorAll('.broadcast-segment-item:checked'), item => item.value),
                 attachments: this.getAttachmentData()
             })
         })
@@ -273,6 +302,11 @@ class BroadcastMessageModel {
         }
 
         this.setBroadcastBlockVisible(true)
+
+        this.broadcastSegmentsContent.innerHTML = (this.segments || []).map(segment => `
+            <label for="seg-${segment.id}">${segment.name}</label>
+            <input id="seg-${segment.id}" class="broadcast-segment-item" type="checkbox" name="segments" value="discord-role-${segment.id}"/>   
+        `).join("\n");
 
         this.setFormVisible(!this.broadcastResultContentString)
         this.setBroadcastResultBlockVisible(Boolean(this.broadcastResultContentString))
@@ -397,7 +431,7 @@ window.onload = function () {
 
     const userInfo = localStorage.getItem('userInfo')
     if (userInfo) {
-        const { login, token } = JSON.parse(userInfo)
+        const {login, token} = JSON.parse(userInfo)
         loginModel.login = login
         loginModel.setToken(token)
     }
