@@ -1,29 +1,28 @@
 import { GuildMember, PartialGuildMember, TextChannel, User } from 'discord.js'
 import { ContactsService } from '../intercom/contacts-service'
-import { WelcomeMessage } from './domain/welcome-message'
 import { MessagesService } from './messages-service'
 import { getAxiosErrorSummary } from '../base-http-service'
+import { SerializeStateProvider } from '../serialize-state-provider'
 
 export class GuildMembersChangeHandlerService {
-    welcomeMessages: WelcomeMessage[] = []
+    serializedStateProvider: SerializeStateProvider
 
     private readonly intercomContactsService: ContactsService
     private readonly discordMessagesService: MessagesService
 
     constructor(
-        welcomeMessages: WelcomeMessage[],
+        serializedStateProvider: SerializeStateProvider,
         intercomContactsService: ContactsService,
         discordMessagesService: MessagesService
     ) {
-        this.welcomeMessages = welcomeMessages || []
+        this.serializedStateProvider = serializedStateProvider
         this.intercomContactsService = intercomContactsService
         this.discordMessagesService = discordMessagesService
     }
 
-    setWelcomeMessages = (value: WelcomeMessage[]) => this.welcomeMessages = value
-
     handleMemberAdd = async (member: GuildMember | PartialGuildMember) => {
-        this.welcomeMessages.forEach(msg => {
+        const welcomeMessages = (await this.serializedStateProvider.getState()).welcomeMessages
+        welcomeMessages.forEach(msg => {
             const messageContent = fillMessageWithUserProps(msg.content, member.user)
             if (msg.channel === 'dm') {
                 this.discordMessagesService.sendMessageToUser(member.user, [messageContent], [])

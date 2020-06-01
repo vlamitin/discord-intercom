@@ -24,6 +24,8 @@ import { IntervalJob } from './utils/interval-job'
 import { processPromises } from './utils/promise-utils'
 import { DiscordSegmentsProvider } from './services/discord/discord-segments-provider';
 import { BroadcastService, SegmentsProvider } from './services/broadcast-service';
+import { FileSerializedStateProvider } from './services/file-serialized-state-provider'
+import { SerializeStateProvider } from './services/serialize-state-provider'
 
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')
@@ -43,6 +45,7 @@ export interface Services {
     syncUsersService: SyncUsersService
     syncConversationsService: SyncConversationsService
     broadcastService: BroadcastService
+    serializedStateProvider: SerializeStateProvider
 }
 
 function initServices(discordClient: Client): Services {
@@ -69,8 +72,9 @@ function initServices(discordClient: Client): Services {
     )
     const intercomWebhooksService = new WebhooksHandlerService(syncConversationsService)
     const messagesHandlerService = new MessagesHandlerService(syncConversationsService)
+    const serializedStateProvider = new FileSerializedStateProvider('./serialized-state.json')
     const discordGuildMembersChangeHandlerService = new GuildMembersChangeHandlerService(
-        serializedState.welcomeMessages,
+        serializedStateProvider,
         intercomContactsService,
         discordMessagesService
     )
@@ -91,7 +95,8 @@ function initServices(discordClient: Client): Services {
         discordMessagesHandlerService: messagesHandlerService,
         syncConversationsService: syncConversationsService,
         discordGuildMembersChangeHandlerService,
-        broadcastService
+        broadcastService,
+        serializedStateProvider
     }
 }
 
