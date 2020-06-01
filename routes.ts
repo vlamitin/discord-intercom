@@ -14,7 +14,7 @@ export function setRoutes(
         syncUsersService,
         discordGuildMembersChangeHandlerService,
         broadcastService,
-        serializedStateProvider
+        appSerializedStateService
     } = services
 
     const authMiddleWare = (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -107,10 +107,8 @@ export function setRoutes(
     })
 
     controllerServer.get('/api/discord/guild/welcome-messages', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        serializedStateProvider.getState().then(state => {
-            res.json({
-                messages: state.welcomeMessages
-            })
+        res.json({
+            messages:  appSerializedStateService.state.welcomeMessages
         })
     })
 
@@ -123,19 +121,11 @@ export function setRoutes(
     }
     *  */
     controllerServer.post('/api/discord/guild/welcome-messages', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        serializedStateProvider.getState()
-            .then(state => {
-                return serializedStateProvider.serialize({...state, welcomeMessages: req.body.messages})
-            })
-            .then(() => {
-                return serializedStateProvider.getState();
-            })
-            .then(state => {
-                res.json({
-                    messages: state.welcomeMessages
-                })
-            });
-
+        let currentState = appSerializedStateService.state
+        appSerializedStateService.setState({...currentState, welcomeMessages: req.body.messages})
+        res.json({
+            messages:  appSerializedStateService.state.welcomeMessages
+        })
     })
 
     controllerServer.post('/api/integration/copy-discord-users-to-intercom', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
