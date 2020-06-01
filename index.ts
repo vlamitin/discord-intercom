@@ -28,6 +28,10 @@ import { BroadcastService, SegmentsProvider } from './services/broadcast-service
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')
 
+if (Array.from('{{username}} bla {{username}}bla'.matchAll(/{{(\w+)}}/g)).length !== 2) {
+    throw new Error('YOU SHOULD USE NODEJS V12+!!')
+}
+
 export interface Services {
     appUsersService: AppUsersService
     appIntercomAuthService: AppIntercomAuthService
