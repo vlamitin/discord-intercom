@@ -24,6 +24,7 @@ import { IntervalJob } from './utils/interval-job'
 import { processPromises } from './utils/promise-utils'
 import { DiscordSegmentsProvider } from './services/discord/discord-segments-provider'
 import { BroadcastService, SegmentsProvider } from './services/broadcast-service'
+import { resendConversationRepliesJobCallback } from './services/jobs/resend-conversation-replies-job'
 
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')
@@ -110,41 +111,8 @@ async function start(): Promise<void> {
     discordClient.on('guildMemberRemove', discordGuildMembersChangeHandlerService.handleMemberRemove)
 
     let resendConversationRepliesJob = new IntervalJob(60 * 1000)
-    resendConversationRepliesJob.startInterval(async () => {
-        const failedReplyIds: string[] = Object.keys(services.appSerializedStateService.state.failedConversationRepliesMap || {})
-        if (failedReplyIds.length === 0) {
-            return
-        }
-        console.debug(new Date().toISOString(), 'info', 'Starting resend ', failedReplyIds.length, 'failed replies ...')
+    resendConversationRepliesJob.startInterval(async () => await resendConversationRepliesJobCallback(services))
 
-        let resendCounter: number = 0
-
-        await processPromises(failedReplyIds.map(replyId => {
-            return async () => {
-                const { conversationId, contactId, discordUsername, content, attachmentUrls }
-                    = services.appSerializedStateService.state.failedConversationRepliesMap[replyId]
-                console.debug(new Date().toISOString(), 'info', `Resending message for user ${discordUsername} ...`)
-
-                const reply = await services.intercomConversationsService.replyToConversation(
-                    conversationId,
-                    contactId,
-                    discordUsername,
-                    '(!) Повторная отправка: \n' + content,
-                    attachmentUrls,
-                )
-                if (reply) {
-                    console.debug(new Date().toISOString(), 'info', `Resending message for user ${discordUsername} success`)
-                    resendCounter++
-                } else {
-                    console.debug(new Date().toISOString(), 'warn', `Resending message for user ${discordUsername} failed`)
-                }
-
-                services.appSerializedStateService.removeFailedReply(replyId)
-            }
-        }), 10)
-
-        console.debug(new Date().toISOString(), 'info', 'Resending finished, resent: ', resendCounter)
-    })
     services.appJobsService.setNewJob(resendConversationRepliesJob)
 
     return startControllerServer(services)
