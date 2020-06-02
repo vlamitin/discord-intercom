@@ -76,7 +76,7 @@ function initServices(discordClient: Client): Services {
         discordMessagesService
     )
     const discordsSegmentsProvider: SegmentsProvider = new DiscordSegmentsProvider(discordUsersService);
-    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider]);
+    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider], appSerializedStateService);
 
     return {
         appUsersService,
