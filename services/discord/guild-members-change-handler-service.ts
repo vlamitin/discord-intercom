@@ -2,6 +2,7 @@ import { GuildMember, PartialGuildMember, TextChannel, User } from 'discord.js'
 import { ContactsService } from '../intercom/contacts-service'
 import { MessagesService } from './messages-service'
 import { getAxiosErrorSummary } from '../base-http-service'
+import { fillMessageWithUserProps } from './message-utils'
 import { AppSerializedStateService } from '../app-serialized-state-service'
 
 export class GuildMembersChangeHandlerService {
@@ -56,16 +57,4 @@ export class GuildMembersChangeHandlerService {
         console.log('TODO on guildMemberRemove remove contacts from intercom?')
         // console.log(JSON.stringify(member))
     }
-}
-
-function fillMessageWithUserProps(messageContent: string, user: User): string {
-    let result = messageContent
-    const matched = Array.from(messageContent.matchAll(/{{(\w+)}}/g)) || []
-    matched.forEach(matchedTuple => {
-        if (matchedTuple[1] in user) {
-            result = result.replace(matchedTuple[0], user[matchedTuple[1]])
-        }
-    })
-
-    return result
 }

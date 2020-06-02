@@ -1,6 +1,7 @@
 import { Client, Message, MessageAttachment, User } from 'discord.js'
 import { Attachment } from './domain/attachment'
 import { processPromises } from '../../utils/promise-utils'
+import { fillMessageWithUserProps } from './message-utils'
 
 export class MessagesService {
     discordClient: Client
@@ -49,9 +50,11 @@ export class MessagesService {
             return
         }
 
+        const textRowsWithUserProps = textRows.map(row => fillMessageWithUserProps(row, user))
+
         console.debug(new Date().toISOString(), 'info', 'sending message to ', user.username + ' ...')
         try {
-            return user.send(textRows, attachments.map(attachment => new MessageAttachment(
+            return user.send(textRowsWithUserProps, attachments.map(attachment => new MessageAttachment(
                 attachment.url,
                 attachment.name,
             )))
