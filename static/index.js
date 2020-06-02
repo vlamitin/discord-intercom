@@ -410,6 +410,110 @@ class CopyUsersModel {
     }
 }
 
+class EditWelcomeMessage {
+    modelContainer = document.querySelector('#edit-welcome-messages')
+    editMessageForm = document.querySelector('#edit-welcome-messages-form')
+    token = ''
+    messages = []
+
+    constructor(token) {
+        this.token = token
+        this.modelContainer.addEventListener('submit', this.handleSubmit)
+        // this.copyUsersBtn.addEventListener('click', this.handleCopyUsers)
+    }
+
+    setToken = token => {
+        this.token = token
+        this.fetchWelcomeMessage()
+        this.render()
+    }
+
+    fetchWelcomeMessage = () => {
+        fetch('/api/discord/guild/welcome-messages', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.token
+            }
+        })
+            .then(res => {
+                return res.json()
+            })
+            .then(res => {
+                this.messages = res.messages
+                this.render();
+            })
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+        document.querySelectorAll("#edit-welcome-messages-form > div")
+        this.messages = [];
+        let count = document.querySelectorAll('.edit-welcome-messages-form-line').length;
+        for (let i = 1; i <= count; i++) {
+            let channelValue = document.querySelector(`input[data-id-line = '${i}']`).value;
+            let messageValue = document.querySelector(`textarea[data-id-line = '${i}']`).value;
+            this.messages = [...this.messages, {channel: channelValue, content: messageValue}];
+        }
+        this.storeWelcomeMessage();
+    }
+
+    storeWelcomeMessage = () => {
+        fetch('/api/discord/guild/welcome-messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.token
+            },
+            body: JSON.stringify({
+                messages: this.messages
+            })
+        })
+            .then(res => {
+                return res.json()
+            })
+            .then(res => {
+                alert("Успешно")
+                this.messages = res.messages
+                this.render();
+            })
+    }
+
+    setVisible = (visible) => {
+        if (visible) {
+            this.modelContainer.style.display = 'block'
+        } else {
+            this.modelContainer.style.display = 'none'
+        }
+    }
+
+    render = () => {
+        if (!this.token) {
+            this.setVisible(false)
+            return
+        }
+
+        this.setVisible(true)
+        let count = 0;
+        this.editMessageForm.innerHTML = this.messages.map(item => {
+            count++;
+            return `
+<div class="edit-welcome-messages-form-line" data-id-line="${count}">
+    <div>
+        <input id="inp-${item.channel}" type="tex" value="${item.channel}" name="channel" data-id-line="${count}">
+    </div>
+    
+    <div>
+        <textarea id="ta-${item.channel}" cols="100" data-id-line="${count}">${item.content}</textarea>   
+    </div>
+             
+</div>
+        `;
+        }).join('\n') + '<button>Save</button>';
+
+    }
+}
+
 window.onload = function () {
     const broadcastMessageModel = new BroadcastMessageModel(false)
     broadcastMessageModel.render()
@@ -417,9 +521,13 @@ window.onload = function () {
     const copyUsersModel = new CopyUsersModel(false)
     copyUsersModel.render()
 
+    const editWelcomeMessage = new EditWelcomeMessage(false)
+    editWelcomeMessage.render()
+
     function handleUserChange(login, token) {
         broadcastMessageModel.setToken(token)
         copyUsersModel.setToken(token)
+        editWelcomeMessage.setToken(token)
         localStorage.setItem('userInfo', JSON.stringify({
             login,
             token
