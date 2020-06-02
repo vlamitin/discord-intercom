@@ -13,7 +13,8 @@ export function setRoutes(
         intercomWebhooksService,
         syncUsersService,
         discordGuildMembersChangeHandlerService,
-        broadcastService
+        broadcastService,
+        appSerializedStateService
     } = services
 
     const authMiddleWare = (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -58,7 +59,7 @@ export function setRoutes(
     }
     *  */
     controllerServer.post('/api/login', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        const { login, password } = req.body
+        const {login, password} = req.body
         const token = appUsersService.getTokenByCreds(login, password)
         if (token) {
             res.status(200).send(JSON.stringify({
@@ -102,13 +103,13 @@ export function setRoutes(
     controllerServer.post('/api/discord/messages/broadcast', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         await broadcastService.broadcast(req.body.message.split('\n'), req.body.attachments, req.body.segments)
 
-        res.status(200).send(JSON.stringify({ success: true }))
+        res.status(200).send(JSON.stringify({success: true}))
     })
 
     controllerServer.get('/api/discord/guild/welcome-messages', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        res.status(200).send(JSON.stringify({
-            messages: discordGuildMembersChangeHandlerService.welcomeMessages
-        }))
+        res.json({
+            messages:  appSerializedStateService.state.welcomeMessages
+        })
     })
 
     /* req.body should be
@@ -120,11 +121,11 @@ export function setRoutes(
     }
     *  */
     controllerServer.post('/api/discord/guild/welcome-messages', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        discordGuildMembersChangeHandlerService.setWelcomeMessages(req.body.messages)
-
-        res.status(200).send(JSON.stringify({
-            messages: discordGuildMembersChangeHandlerService.welcomeMessages
-        }))
+        let currentState = appSerializedStateService.state
+        appSerializedStateService.setState({...currentState, welcomeMessages: req.body.messages})
+        res.json({
+            messages:  appSerializedStateService.state.welcomeMessages
+        })
     })
 
     controllerServer.post('/api/integration/copy-discord-users-to-intercom', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -50,3 +50,17 @@
     justify-content: space-between;
     width: 400px;
 }
+.edit-welcome-messages-form-line {
+    display: flex;
+}
+.edit-welcome-messages-form-line label{
+    display: flex;
+}
+.edit-welcome-messages-form-line > div{
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-welcome-messages-form-line input{
+    margin-right: 30px;
+}
