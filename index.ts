@@ -25,6 +25,8 @@ import { processPromises } from './utils/promise-utils'
 import { DiscordSegmentsProvider } from './services/discord/discord-segments-provider'
 import { BroadcastService, SegmentsProvider } from './services/broadcast-service'
 import { resendConversationRepliesJobCallback } from './services/jobs/resend-conversation-replies-job'
+import { broadcastScheduleJobCallback } from './services/jobs/broadcast-schedule-job'
+import { BroadcastSerializedDataService } from './services/broadcast-serialized-data-service'
 
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')
@@ -44,6 +46,7 @@ export interface Services {
     syncUsersService: SyncUsersService
     syncConversationsService: SyncConversationsService
     broadcastService: BroadcastService
+    broadcastSerializedDataService: BroadcastSerializedDataService
 }
 
 function initServices(discordClient: Client): Services {
@@ -76,8 +79,8 @@ function initServices(discordClient: Client): Services {
         discordMessagesService
     )
     const discordsSegmentsProvider: SegmentsProvider = new DiscordSegmentsProvider(discordUsersService);
-    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider], appSerializedStateService);
-
+    const broadcastSerializedDataService = new BroadcastSerializedDataService("./serialized-broadcasts-data.json")
+    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider], broadcastSerializedDataService);
     return {
         appUsersService,
         appIntercomAuthService,
@@ -93,6 +96,7 @@ function initServices(discordClient: Client): Services {
         syncConversationsService: syncConversationsService,
         discordGuildMembersChangeHandlerService,
         broadcastService,
+        broadcastSerializedDataService
     }
 }
 
@@ -112,8 +116,11 @@ async function start(): Promise<void> {
 
     let resendConversationRepliesJob = new IntervalJob(60 * 1000)
     resendConversationRepliesJob.startInterval(async () => await resendConversationRepliesJobCallback(services))
-
     services.appJobsService.setNewJob(resendConversationRepliesJob)
+
+    let broadcastSchedulingJob = new IntervalJob(15 * 1000)
+    broadcastSchedulingJob.startInterval(async () => await broadcastScheduleJobCallback(services))
+    services.appJobsService.setNewJob(broadcastSchedulingJob)
 
     return startControllerServer(services)
 }

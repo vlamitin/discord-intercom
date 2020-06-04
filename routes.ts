@@ -101,7 +101,7 @@ export function setRoutes(
     }
      */
     controllerServer.post('/api/discord/messages/broadcast', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        await broadcastService.broadcast(req.body.message.split('\n'), req.body.attachments, req.body.segments, new Date(req.body.date))
+        await broadcastService.broadcast(req.body.message.split('\n'), req.body.attachments, req.body.segments, req.body.date)
 
         res.status(200).send(JSON.stringify({success: true}))
     })

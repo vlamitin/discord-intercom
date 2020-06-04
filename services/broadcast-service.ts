@@ -1,6 +1,6 @@
 import { MessagesService } from './discord/messages-service'
 import { Attachment } from './discord/domain/attachment'
-import { AppSerializedStateService } from './app-serialized-state-service'
+import { Broadcast, BroadcastSerializedDataService } from './broadcast-serialized-data-service'
 
 export interface SegmentsProvider {
     getUserIds(segmentIds: string[]): string[]
@@ -8,31 +8,22 @@ export interface SegmentsProvider {
 
 export class BroadcastService {
     discordMessageService: MessagesService
-    appSerializedStateService: AppSerializedStateService
+    broadcastSerializedDataService: BroadcastSerializedDataService
     providers: SegmentsProvider[]
 
-    constructor(discordMessageService: MessagesService, providers: SegmentsProvider[], appSerializedStateService: AppSerializedStateService) {
+    constructor(discordMessageService: MessagesService, providers: SegmentsProvider[], broadcastSerializedDataService: BroadcastSerializedDataService) {
         this.discordMessageService = discordMessageService
         this.providers = providers
-        this.appSerializedStateService = appSerializedStateService
+        this.broadcastSerializedDataService = broadcastSerializedDataService
     }
 
-    broadcast = async (messages: string[], attachments: Attachment[], segments?: string[], date?: Date) => {
-        if (date && date > new Date()) {
+    broadcast = async (messages: string[], attachments: Attachment[], segments?: string[], date?: string) => {
+        if (date && new Date(date) > new Date()) {
             // need to schedule
-            const bm = {
+            const bm: Broadcast = {
                 messages, attachments, segments, date
             }
-            const nextState = {
-                ...this.appSerializedStateService.state,
-                scheduledBroadcasts: [
-                    ...this.appSerializedStateService.state.scheduledBroadcasts,
-                    bm
-                ]
-            }
-            // TODO non atomic
-            this.appSerializedStateService.setState(nextState)
-            return Promise.resolve()
+            this.broadcastSerializedDataService.addBroadcast(bm);
         } else {
             return this.doBroadcast(messages, attachments, segments)
         }
