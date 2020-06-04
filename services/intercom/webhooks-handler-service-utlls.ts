@@ -19,6 +19,8 @@ export function parseMessageBody(htmlPart: string): ParsedMessage {
     Array.from(dom.window.document.querySelectorAll('img'))
         .forEach((img: HTMLImageElement) => result.imageUrls.push(img.src))
 
+    result.textRows = result.textRows.map(row => row.replace('&nbsp;', ''))
+
     return result
 }
 

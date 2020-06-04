@@ -7,7 +7,7 @@ Integration between discord and intercom
 - communicate with discord users via intercom
 
 ## Prerequisites
-- node v10.*
+- node v12.*
 - npm v6.*
 - https domain name (needed for intercom webhooks handling)
 
