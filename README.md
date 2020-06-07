@@ -26,15 +26,17 @@ Integration between discord and intercom
 - fill config.json with your params (discord and intercom tokens, etc)
 - `cp serialized-state.json.example serialized-state.json`
 - fill serialized-state.json with default state (see format description in serialized-state.ts)
+- `cp serialized-broadcasts-data.json.example serialized-broadcasts-data.json`
 
 ## Local run
 - `npm run start`
 
 ## Docker run
 - `npm run docker:build`
-- copy config.json and serialized-state.json to some folder, e.g /tmp/app
+- copy `config.json`, `serialized-state.json` and `run.bot.sh` to some folder, e.g `/tmp/app`
 - `cd /tmp/app`
-- `docker run -d -p 3002:3002 -v $PWD/config.json:/app/config.json -v $PWD/serialized-state.json:/app/serialized-state.json discord-intercom:latest` 
+- `chmod +x run.bot.sh` 
+- `./run.bot.sh` 
 
 ## Development tips
 - while getting new discord token is free, creating new intercom account needs you to fill credit card details to gain trial  
