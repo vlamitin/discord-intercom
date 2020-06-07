@@ -21,7 +21,6 @@ import { AppIntercomAuthService } from './services/app-intercom-auth-service'
 import { AppJobsService } from './services/app-jobs-service'
 import { AppSerializedStateService } from './services/app-serialized-state-service'
 import { IntervalJob } from './utils/interval-job'
-import { processPromises } from './utils/promise-utils'
 import { DiscordSegmentsProvider } from './services/discord/discord-segments-provider'
 import { BroadcastService, SegmentsProvider } from './services/broadcast-service'
 import { resendConversationRepliesJobCallback } from './services/jobs/resend-conversation-replies-job'
@@ -56,7 +55,7 @@ export interface Services {
 function initServices(discordClient: Client): Services {
     const appUsersService = new AppUsersService(serializedState.users)
     const appJobsService = new AppJobsService([])
-    const appSerializedStateService = new AppSerializedStateService(serializedState, path.resolve(__dirname, './serialized-state.json'))
+    const appSerializedStateService = new AppSerializedStateService(path.resolve(__dirname, './serialized-state.json'))
     const appIntercomAuthService = new AppIntercomAuthService(
         config.intercomClientID,
         config.intercomAppID
@@ -82,9 +81,9 @@ function initServices(discordClient: Client): Services {
         intercomContactsService,
         discordMessagesService
     )
-    const discordsSegmentsProvider: SegmentsProvider = new DiscordSegmentsProvider(discordUsersService);
-    const broadcastSerializedDataService = new BroadcastSerializedDataService("./serialized-broadcasts-data.json")
-    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider], broadcastSerializedDataService);
+    const discordsSegmentsProvider: SegmentsProvider = new DiscordSegmentsProvider(discordUsersService)
+    const broadcastSerializedDataService = new BroadcastSerializedDataService(path.resolve(__dirname, './serialized-broadcasts-data.json'))
+    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider], broadcastSerializedDataService)
     return {
         appUsersService,
         appIntercomAuthService,
@@ -112,7 +111,7 @@ async function start(): Promise<void> {
     const discordClient = await startDiscordBot(config.discordBotToken)
 
     const services: Services = initServices(discordClient)
-    const { discordMessagesHandlerService, discordGuildMembersChangeHandlerService } = services
+    const {discordMessagesHandlerService, discordGuildMembersChangeHandlerService} = services
 
     discordClient.on('message', discordMessagesHandlerService.handleMessage)
     discordClient.on('guildMemberAdd', discordGuildMembersChangeHandlerService.handleMemberAdd)
@@ -150,7 +149,7 @@ async function startControllerServer(services: Services): Promise<void> {
 
     appServer.use((err, req, res, next) => {
         console.error(new Date().toISOString(), 'error', err)
-        res.status(500).send({ error: err.message })
+        res.status(500).send({error: err.message})
     })
 
     return new Promise(resolve => {

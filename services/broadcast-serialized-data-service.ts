@@ -1,42 +1,34 @@
-Date.prototype.toJSON = function(){ return this.toString(); }
+import { SerializedDataStorage } from './domain/serialized-data-storage'
+
 import { Attachment } from './discord/domain/attachment'
-import * as fs from 'fs'
 
 export interface Broadcast {
     messages: string[],
     attachments: Attachment[],
     segments: string[]
-    date: string
+    date: string // yyyy-MM-ddTHH:mm
 }
 
 export class BroadcastSerializedDataService {
-    state: Broadcast[] = []
-    filePath: string
+    serializedDataStorage: SerializedDataStorage<Broadcast[]>
+    state: Broadcast[]
 
     constructor(filePath: string) {
-        this.filePath = filePath
-        this.reload()
+        this.serializedDataStorage = new SerializedDataStorage<Broadcast[]>(filePath)
+        this.state = this.serializedDataStorage.reload() || []
     }
 
     addBroadcast(broadcast: Broadcast): void {
-
         this.state.push(broadcast)
-        this.sync()
+        this.serializedDataStorage.sync(this.state)
     }
 
     removeByIndex(index: number): void {
-        this.state[index] = null;
-        this.sync()
+        this.state[index] = null
+        this.serializedDataStorage.sync(this.state)
     }
 
-    public reload(): void {
-        if (fs.existsSync(this.filePath)) {
-            this.state = JSON.parse(fs.readFileSync(this.filePath).toString())
-        }
+    reload() {
+        this.state = this.serializedDataStorage.reload() || []
     }
-
-    private sync(): void {
-        fs.writeFileSync(this.filePath, JSON.stringify(this.state.filter(item => item != null)), {encoding: 'utf-8'})
-    }
-
 }
