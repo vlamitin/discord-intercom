@@ -93,11 +93,12 @@ export function setRoutes(
     /* req.body should be
     {
         "message": "bla",
-        segments: []
+        segments: [],
         "attachments": [{
             "name": "file.txt",
             "url": "https://cdn.com/file.txt"
-        }]
+        }],
+        date: "2020-06-07T16:49"
     }
      */
     controllerServer.post('/api/discord/messages/broadcast', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -108,7 +109,7 @@ export function setRoutes(
 
     controllerServer.get('/api/discord/guild/welcome-messages', authMiddleWare, async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         res.json({
-            messages:  appSerializedStateService.state.welcomeMessages
+            messages: appSerializedStateService.state.welcomeMessages
         })
     })
 
@@ -124,7 +125,7 @@ export function setRoutes(
         let currentState = appSerializedStateService.state
         appSerializedStateService.setState({...currentState, welcomeMessages: req.body.messages})
         res.json({
-            messages:  appSerializedStateService.state.welcomeMessages
+            messages: appSerializedStateService.state.welcomeMessages
         })
     })
 
