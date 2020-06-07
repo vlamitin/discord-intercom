@@ -25,7 +25,7 @@ import { DiscordSegmentsProvider } from './services/discord/discord-segments-pro
 import { BroadcastService, SegmentsProvider } from './services/broadcast-service'
 import { resendConversationRepliesJobCallback } from './services/jobs/resend-conversation-replies-job'
 import { broadcastScheduleJobCallback } from './services/jobs/broadcast-schedule-job'
-import { BroadcastSerializedDataService } from './services/broadcast-serialized-data-service'
+import { BroadcastSerializedDataService } from './services/domain/broadcast-serialized-data-service'
 
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')

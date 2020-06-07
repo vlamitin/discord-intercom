@@ -1,6 +1,6 @@
-import { SerializedDataStorage } from './domain/serialized-data-storage'
+import { SerializedDataStorage } from './serialized-data-storage'
 
-import { Attachment } from './discord/domain/attachment'
+import { Attachment } from '../discord/domain/attachment'
 
 export interface Broadcast {
     messages: string[],

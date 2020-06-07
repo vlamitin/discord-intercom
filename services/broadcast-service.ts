@@ -1,6 +1,6 @@
 import { MessagesService } from './discord/messages-service'
 import { Attachment } from './discord/domain/attachment'
-import { Broadcast, BroadcastSerializedDataService } from './broadcast-serialized-data-service'
+import { Broadcast, BroadcastSerializedDataService } from './domain/broadcast-serialized-data-service'
 
 export interface SegmentsProvider {
     getUserIds(segmentIds: string[]): string[]

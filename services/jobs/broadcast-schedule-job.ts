@@ -1,5 +1,5 @@
 import { Services } from '../../index'
-import { Broadcast } from '../broadcast-serialized-data-service'
+import { Broadcast } from '../domain/broadcast-serialized-data-service'
 
 export function readyToSend(now: Date, broadcast: Broadcast) {
     if (!broadcast) {
