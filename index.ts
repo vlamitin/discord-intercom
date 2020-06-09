@@ -21,9 +21,11 @@ import { AppIntercomAuthService } from './services/app-intercom-auth-service'
 import { AppJobsService } from './services/app-jobs-service'
 import { AppSerializedStateService } from './services/app-serialized-state-service'
 import { IntervalJob } from './utils/interval-job'
-import { processPromises } from './utils/promise-utils'
 import { DiscordSegmentsProvider } from './services/discord/discord-segments-provider'
 import { BroadcastService, SegmentsProvider } from './services/broadcast-service'
+import { resendConversationRepliesJobCallback } from './services/jobs/resend-conversation-replies-job'
+import { broadcastScheduleJobCallback } from './services/jobs/broadcast-schedule-job'
+import { BroadcastSerializedDataService } from './services/domain/broadcast-serialized-data-service'
 
 const config: Config = require('./config.json')
 const serializedState: SerializedState = require('./serialized-state.json')
@@ -47,12 +49,13 @@ export interface Services {
     syncUsersService: SyncUsersService
     syncConversationsService: SyncConversationsService
     broadcastService: BroadcastService
+    broadcastSerializedDataService: BroadcastSerializedDataService
 }
 
 function initServices(discordClient: Client): Services {
     const appUsersService = new AppUsersService(serializedState.users)
     const appJobsService = new AppJobsService([])
-    const appSerializedStateService = new AppSerializedStateService(serializedState, path.resolve(__dirname, './serialized-state.json'))
+    const appSerializedStateService = new AppSerializedStateService(path.resolve(__dirname, './serialized-state.json'))
     const appIntercomAuthService = new AppIntercomAuthService(
         config.intercomClientID,
         config.intercomAppID
@@ -78,9 +81,9 @@ function initServices(discordClient: Client): Services {
         intercomContactsService,
         discordMessagesService
     )
-    const discordsSegmentsProvider: SegmentsProvider = new DiscordSegmentsProvider(discordUsersService);
-    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider]);
-
+    const discordsSegmentsProvider: SegmentsProvider = new DiscordSegmentsProvider(discordUsersService)
+    const broadcastSerializedDataService = new BroadcastSerializedDataService(path.resolve(__dirname, './serialized-broadcasts-data.json'))
+    const broadcastService = new BroadcastService(discordMessagesService, [discordsSegmentsProvider], broadcastSerializedDataService)
     return {
         appUsersService,
         appIntercomAuthService,
@@ -96,6 +99,7 @@ function initServices(discordClient: Client): Services {
         syncConversationsService: syncConversationsService,
         discordGuildMembersChangeHandlerService,
         broadcastService,
+        broadcastSerializedDataService
     }
 }
 
@@ -107,49 +111,19 @@ async function start(): Promise<void> {
     const discordClient = await startDiscordBot(config.discordBotToken)
 
     const services: Services = initServices(discordClient)
-    const { discordMessagesHandlerService, discordGuildMembersChangeHandlerService } = services
+    const {discordMessagesHandlerService, discordGuildMembersChangeHandlerService} = services
 
     discordClient.on('message', discordMessagesHandlerService.handleMessage)
     discordClient.on('guildMemberAdd', discordGuildMembersChangeHandlerService.handleMemberAdd)
     discordClient.on('guildMemberRemove', discordGuildMembersChangeHandlerService.handleMemberRemove)
 
     let resendConversationRepliesJob = new IntervalJob(60 * 1000)
-    resendConversationRepliesJob.startInterval(async () => {
-        const failedReplyIds: string[] = Object.keys(services.appSerializedStateService.state.failedConversationRepliesMap || {})
-        if (failedReplyIds.length === 0) {
-            return
-        }
-        console.debug(new Date().toISOString(), 'info', 'Starting resend ', failedReplyIds.length, 'failed replies ...')
-
-        let resendCounter: number = 0
-
-        await processPromises(failedReplyIds.map(replyId => {
-            return async () => {
-                const { conversationId, contactId, discordUsername, content, attachmentUrls }
-                    = services.appSerializedStateService.state.failedConversationRepliesMap[replyId]
-                console.debug(new Date().toISOString(), 'info', `Resending message for user ${discordUsername} ...`)
-
-                const reply = await services.intercomConversationsService.replyToConversation(
-                    conversationId,
-                    contactId,
-                    discordUsername,
-                    '(!) Повторная отправка: \n' + content,
-                    attachmentUrls,
-                )
-                if (reply) {
-                    console.debug(new Date().toISOString(), 'info', `Resending message for user ${discordUsername} success`)
-                    resendCounter++
-                } else {
-                    console.debug(new Date().toISOString(), 'warn', `Resending message for user ${discordUsername} failed`)
-                }
-
-                services.appSerializedStateService.removeFailedReply(replyId)
-            }
-        }), 10)
-
-        console.debug(new Date().toISOString(), 'info', 'Resending finished, resent: ', resendCounter)
-    })
+    resendConversationRepliesJob.startInterval(async () => await resendConversationRepliesJobCallback(services))
     services.appJobsService.setNewJob(resendConversationRepliesJob)
+
+    let broadcastSchedulingJob = new IntervalJob(15 * 1000)
+    broadcastSchedulingJob.startInterval(async () => await broadcastScheduleJobCallback(services))
+    services.appJobsService.setNewJob(broadcastSchedulingJob)
 
     return startControllerServer(services)
 }
@@ -175,7 +149,7 @@ async function startControllerServer(services: Services): Promise<void> {
 
     appServer.use((err, req, res, next) => {
         console.error(new Date().toISOString(), 'error', err)
-        res.status(500).send({ error: err.message })
+        res.status(500).send({error: err.message})
     })
 
     return new Promise(resolve => {

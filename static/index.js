@@ -140,6 +140,7 @@ class BroadcastMessageModel {
     broadcastResultBlock = document.querySelector('#broadcast-result')
     broadcastResultContent = document.querySelector('#broadcast-result-content')
     oneMoreMessageBtn = document.querySelector('#one-more-message-btn')
+    broadcastDatetimeContent = document.querySelector('#broadcast-datetime')
 
     token = ''
     segments = []
@@ -276,7 +277,8 @@ class BroadcastMessageModel {
                 message: this.message,
                 segments: Array.prototype.map.call(
                     document.querySelectorAll('.broadcast-segment-item:checked'), item => item.value),
-                attachments: this.getAttachmentData()
+                attachments: this.getAttachmentData(),
+                date: this.broadcastDatetimeContent.value
             })
         })
             .then(res => {

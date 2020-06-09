@@ -16,5 +16,6 @@
       "name": "John"
     }
   ],
-  "failedConversationRepliesMap": {}
+  "failedConversationRepliesMap": {},
+  "scheduledBroadcasts": []
 }
