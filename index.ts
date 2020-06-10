@@ -1,6 +1,9 @@
 import * as express from 'express'
 import * as path from 'path'
 import * as bodyParser from 'body-parser'
+import * as http from 'http'
+import * as fs from 'fs'
+import * as https from 'https'
 import { setRoutes } from './routes'
 import { Client } from 'discord.js'
 import { startDiscordBot } from './services/discord/bot-starter'
@@ -129,7 +132,10 @@ async function start(): Promise<void> {
 }
 
 async function startControllerServer(services: Services): Promise<void> {
-    const port = process.env.API_PORT || config.port || 3002
+    const httpPort = process.env.DISCORD_INTERCOM_HTTP_PORT || config.httpPort || 8442
+    const httpsPort = process.env.DISCORD_INTERCOM_HTTPS_PORT || config.httpsPort
+    const publicCertRelativePath = process.env.DISCORD_INTERCOM_PUB_CERT_PATH || config.publicCertRelativePath
+    const privateCertKeyRelativePath = process.env.DISCORD_INTERCOM_PRIV_CERT_PATH || config.privateCertKeyRelativePath
 
     const appServer: express.Express = express()
 
@@ -153,9 +159,23 @@ async function startControllerServer(services: Services): Promise<void> {
     })
 
     return new Promise(resolve => {
-        appServer.listen(port, () => {
-            console.debug(new Date().toISOString(), 'info', 'Discord controller running on port:', port)
-            resolve()
+        http.createServer(appServer).listen(httpPort, () => {
+            console.debug(new Date().toISOString(), 'info', 'Discord controller http running on port:', httpPort)
+
+            if (!httpsPort
+                || !publicCertRelativePath || !fs.existsSync(path.resolve(__dirname, publicCertRelativePath))
+                || !privateCertKeyRelativePath || !fs.existsSync(path.resolve(__dirname, privateCertKeyRelativePath))) {
+                return resolve()
+            }
+
+            https.createServer({
+                    cert: fs.readFileSync(path.resolve(__dirname, publicCertRelativePath), 'utf8'),
+                    key: fs.readFileSync(path.resolve(__dirname, privateCertKeyRelativePath), 'utf8'),
+                }, appServer)
+                .listen(httpsPort, () => {
+                    console.debug(new Date().toISOString(), 'info', 'Discord controller https running on port:', httpsPort)
+                    return resolve()
+                });
         })
     })
 }

@@ -33,10 +33,17 @@ Integration between discord and intercom
 
 ## Docker run
 - `npm run docker:build`
-- copy `config.json`, `serialized-state.json` and `run.bot.sh` to some folder, e.g `/tmp/app`
+- copy `config.json`, `serialized-state.json`, `serialized-broadcasts-data.json` and `run.bot.sh` to some folder, e.g `/tmp/app`
 - `cd /tmp/app`
-- `chmod +x run.bot.sh` 
-- `./run.bot.sh` 
+- `chmod +x run.bot.sh`
+- `./run.bot.sh`
+
+## Docker run with https (certbot)
+- generate certificate with certbot certonly command
+- fill certs location inside docker (/app/certs/fullchain.pem and /app/certs/privkey.pem)
+- copy `run.bot.https.sh` to your /tmp/app folder (change path of volume with certs in your host machine according to your domain name)
+- `chmod +x run.bot.https.sh`
+- `./run.bot.https.sh`
 
 ## Development tips
 - while getting new discord token is free, creating new intercom account needs you to fill credit card details to gain trial  
