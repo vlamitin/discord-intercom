@@ -1,5 +1,8 @@
 {
-  "port": 3002,
+  "httpPort": 8442,
+  "httpsPort": 8443,
+  "publicCertRelativePath": "/app/certs/fullchain.pem"
+  "privateCertKeyRelativePath": "/app/certs/privkey.pem"
   "discordBotToken": "M2NfNDQxM=",
   "intercomApiUrl": "https://api.intercom.io",
   "intercomClientID": "asdfasdf-asdfasd-gry4wer-wertyert-erty",
