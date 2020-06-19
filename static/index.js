@@ -131,6 +131,7 @@ class BroadcastMessageModel {
 
     broadcastForm = document.querySelector('#broadcast-form')
     broadcastInput = document.querySelector('#broadcast-input')
+    charsCount = document.querySelector('#chars-count')
     broadcastAttachmentsContent = document.querySelector('#broadcast-attachments-content')
     broadcastSegmentsContent = document.querySelector('.broadcast-segments')
     addAttachmentBtn = document.querySelector('#add-attachment-btn')
@@ -319,6 +320,8 @@ class BroadcastMessageModel {
             this.broadcastInput.value = this.message
             this.broadcastSubmitBtn.disabled = !this.valid()
         }
+
+        this.charsCount.innerHTML = this.message ? this.message.length : 0;
     }
 }
 
