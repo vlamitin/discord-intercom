@@ -3,6 +3,10 @@ import { Attachment } from './domain/attachment'
 import { processPromises } from '../../utils/promise-utils'
 import { fillMessageWithUserProps } from './message-utils'
 
+export interface BroadcastMessageCallback {
+    (User): void
+}
+
 export class MessagesService {
     discordClient: Client
 
@@ -10,19 +14,26 @@ export class MessagesService {
         this.discordClient = discordClient
     }
 
-    broadcastMessage = async (messages: string[], attachments: Attachment[], userIds: Set<string>) => {
+    broadcastMessage = async (messages: string[], attachments: Attachment[], userIds: string[], cb?: BroadcastMessageCallback) => {
         const promises = []
         console.debug(new Date().toISOString(), 'info', 'Users found: ', this.discordClient.users.cache.size)
         this.discordClient.users.cache.forEach(((user: User, key) => {
             if (user.bot) {
                 return
             }
-            if (!userIds.has(user.id)) {
+            if (!userIds.includes(user.id)) {
                 return
             }
-            promises.push(async () => this.sendMessageToUser(user, messages, attachments))
+            promises.push(async () => this.sendMessageToUser(user, messages, attachments).then(r => {
+                if (cb) {
+                    cb(user)
+                }
+            }))
         }))
-
+        function delay(ms: number) {
+            return new Promise( resolve => setTimeout(resolve, ms) );
+        }
+        await delay(30000);
         return processPromises(promises, 10)
     }
 

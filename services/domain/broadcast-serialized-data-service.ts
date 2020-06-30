@@ -5,7 +5,7 @@ import { Attachment } from '../discord/domain/attachment'
 export interface Broadcast {
     messages: string[],
     attachments: Attachment[],
-    segments: string[]
+    userIds: string[],
     date: string // yyyy-MM-ddTHH:mm
 }
 
@@ -25,10 +25,14 @@ export class BroadcastSerializedDataService {
 
     removeByIndex(index: number): void {
         this.state[index] = null
-        this.serializedDataStorage.sync(this.state)
+        this.serializedDataStorage.sync(this.state.filter(item => item != null))
     }
 
     reload() {
         this.state = this.serializedDataStorage.reload() || []
+    }
+
+    save() {
+        this.serializedDataStorage.sync(this.state)
     }
 }
